@@ -1137,6 +1137,100 @@
         setLoading(false);
     };
 
+
+
+    const bindTransactionAmountFormatter = (inputId) => {
+        const input = document.getElementById(inputId);
+        if (!input || input.dataset.bound === 'true') return;
+        input.dataset.bound = 'true';
+        input.addEventListener('input', function () {
+            const numeric = (this.value || '').replace(/\D/g, '');
+            const value = parseInt(numeric || '0', 10);
+            this.setAttribute('data-numeric', String(value));
+            this.value = numeric ? formatRupiah(value) : '';
+        });
+        input.addEventListener('focus', function () {
+            const value = parseInt(this.getAttribute('data-numeric') || '0', 10);
+            this.value = value > 0 ? formatRupiah(value) : '';
+        });
+    };
+
+    const openTransactionModal = async () => {
+        if (!currentUser) return showToast('Silakan login dulu!', true);
+        const modal = document.getElementById('transaction-modal');
+        const noteInput = document.getElementById('modal-pos-note');
+        const amountInput = document.getElementById('modal-pos-amount');
+        const statusBox = document.getElementById('modal-pos-status');
+        if (!modal || !noteInput || !amountInput) return showToast('Modal transaksi tidak ditemukan!', true);
+
+        bindTransactionAmountFormatter('modal-pos-amount');
+        modal.classList.add('show');
+        modal.style.display = 'flex';
+        noteInput.value = '';
+        amountInput.value = '';
+        amountInput.setAttribute('data-numeric', '0');
+
+        const has = await hasClockedInToday();
+        if (statusBox) {
+            statusBox.innerHTML = has
+                ? `<div style="display:flex;align-items:center;gap:9px;padding:11px 13px;background:var(--green-dim);border:1px solid rgba(82,216,158,0.18);border-radius:11px"><i class="fas fa-circle-check" style="color:var(--green);font-size:13px"></i><span style="font-size:12.5px;color:var(--green);font-weight:600">Siap melakukan transaksi</span></div>`
+                : `<div style="display:flex;align-items:center;gap:9px;padding:11px 13px;background:var(--red-dim);border:1px solid rgba(255,107,107,0.2);border-radius:11px"><i class="fas fa-circle-xmark" style="color:var(--red);font-size:13px"></i><span style="font-size:12.5px;color:var(--red);font-weight:600">Absen dulu sebelum transaksi!</span></div>`;
+        }
+
+        setTimeout(() => noteInput.focus(), 100);
+    };
+
+    const closeTransactionModal = () => {
+        const modal = document.getElementById('transaction-modal');
+        if (!modal) return;
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+    };
+
+    const handleTransactionFromModal = async () => {
+        if (!(await hasClockedInToday())) {
+            showToast('Absen dulu sebelum transaksi!', true);
+            closeTransactionModal();
+            setTimeout(() => router.navigate('home'), 1000);
+            return;
+        }
+
+        const noteInput = document.getElementById('modal-pos-note');
+        const amountInput = document.getElementById('modal-pos-amount');
+        const amount = parseInt(amountInput?.getAttribute('data-numeric') || '0', 10);
+        const note = (noteInput?.value || '').trim();
+
+        if (!amount || amount <= 0) {
+            showToast('Nominal tidak valid!', true);
+            if (amountInput) amountInput.focus();
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const trx = {
+                user: currentUser.username,
+                name: currentUser.name,
+                amount,
+                note: note || 'Transaksi',
+                time: getWIBForSheet()
+            };
+            const nid = Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '_' + currentUser.username;
+            trx.id = nid;
+            trx.serverId = nid;
+            await dbAction('transactions', 'add', trx);
+            cachedTransactions.unshift(trx);
+            syncToServer('transaction', trx);
+            showToast('✓ Transaksi Disimpan!');
+            closeTransactionModal();
+            await updateBonusUI();
+            await refreshCurrentPage();
+        } catch (e) {
+            showToast('Gagal transaksi', true);
+        }
+        setLoading(false);
+    };
+
     // ── UTILS ──
     function calculateDistance(la1,lo1,la2,lo2){const R=6371e3,dL=(la2-la1)*Math.PI/180,dO=(lo2-lo1)*Math.PI/180,a=Math.sin(dL/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dO/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
 
@@ -1487,8 +1581,26 @@
         setLoading(false);
     };
 
-    const handleLogout = () => {
-        if(confirm("Keluar dari aplikasi?")){ localStorage.removeItem('current_user'); currentUser=null; cachedTransactions=[]; cachedAttendance=[]; router.navigate('login'); }
+    const clearAppSession = async () => {
+        const keys = ['current_user','has_clocked_in','last_attendance_date'];
+        keys.forEach(k => localStorage.removeItem(k));
+        sessionStorage.clear();
+        try {
+            if ('caches' in window) {
+                const names = await caches.keys();
+                await Promise.all(names.map(name => caches.delete(name)));
+            }
+        } catch (e) {}
+    };
+
+    const handleLogout = async () => {
+        if(confirm("Keluar dari aplikasi?")){
+            await clearAppSession();
+            currentUser=null;
+            cachedTransactions=[];
+            cachedAttendance=[];
+            router.navigate('login');
+        }
     };
 
     // ── SESSION ──
