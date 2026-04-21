@@ -855,6 +855,34 @@
         </div>
     </div>
 
+
+    <!-- Modal: Transaksi -->
+    <div id="transaction-modal" class="modal-wrap">
+        <div class="modal-sheet">
+            <div class="modal-pill"></div>
+            <div class="modal-ico" style="background:var(--accent-dim);border:1px solid rgba(91,143,255,0.2)">
+                <i class="fas fa-plus" style="color:var(--accent)"></i>
+            </div>
+            <h3 style="font-size:16px;font-weight:700;text-align:center;margin-bottom:4px">Tambah Transaksi</h3>
+            <p style="font-size:12px;color:var(--text-soft);text-align:center;margin-bottom:16px">Input transaksi baru</p>
+            <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:14px 15px">
+                    <p class="label-xs">Keterangan / Item</p>
+                    <input id="modal-pos-note" type="text" placeholder="Pashmina, Hijab, dll..." class="g-input" style="background:none;border:none;padding:0;font-size:15px">
+                </div>
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:14px 15px">
+                    <p class="label-xs">Nominal</p>
+                    <input id="modal-pos-amount" type="text" inputmode="numeric" placeholder="0" class="amount-display" data-numeric="0">
+                </div>
+            </div>
+            <div id="modal-pos-status" style="margin:14px 0 0"></div>
+            <div style="display:flex;gap:10px;margin-top:16px">
+                <button onclick="closeTransactionModal()" class="btn btn-glass" style="flex:1;padding:12px;font-size:13px">Batal</button>
+                <button id="btn-transaksi-modal" onclick="handleTransactionFromModal()" class="btn btn-primary" style="flex:1;padding:12px;font-size:13px">Simpan</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Page Content -->
     <div id="page-content"></div>
 
@@ -874,7 +902,7 @@
         </button>
     </nav>
 
-    <button id="fab-pos" class="fab-add" onclick="router.navigate('pos')" aria-label="Tambah transaksi">
+    <button id="fab-pos" class="fab-add" onclick="openTransactionModal()" aria-label="Tambah transaksi">
         <i class="fas fa-plus"></i>
     </button>
 </div>
@@ -1029,8 +1057,15 @@
         const te=document.getElementById('today-income'),ae=document.getElementById('today-attendance-info'),me=document.getElementById('month-omzet');
         if(oe) oe.innerText=`Rp ${formatRupiah(bonus)}`;
         if(be) be.innerText=`1% dari omzet ${getNamaBulan(m)} · reset tiap bulan`;
+        const ac=document.getElementById('today-attendance-card'), al=document.getElementById('today-attendance-label');
         if(te) te.innerText=`Rp ${formatRupiah(pendapatanHariIni)}`;
-        if(ae) ae.innerText=todayAttendance?`Sudah absen · ${formatWIBTime(todayAttendance.time).split(' ')[1]}`:'Belum absen hari ini';
+        if(ae) ae.innerText=todayAttendance?formatWIBTime(todayAttendance.time).split(' ')[1].slice(0,5):'--:--';
+        if(al) al.style.color=todayAttendance?'var(--green)':'var(--red)';
+        if(ae) ae.style.color=todayAttendance?'var(--green)':'var(--red)';
+        if(ac){
+            ac.style.background=todayAttendance?'var(--green-dim)':'var(--red-dim)';
+            ac.style.borderColor=todayAttendance?'rgba(82,216,158,0.2)':'rgba(255,107,107,0.2)';
+        }
         if(me) me.innerText=`Rp ${formatRupiah(omzetBulanan)}`;
     };
 
@@ -1538,9 +1573,9 @@
                             <p class="label-xs" style="margin-bottom:8px">Pendapatan Hari Ini</p>
                             <p id="today-income" style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--text)">Rp 0</p>
                         </div>
-                        <div class="card" style="padding:14px 15px">
-                            <p class="label-xs" style="margin-bottom:8px">Absen Hari Ini</p>
-                            <p id="today-attendance-info" style="font-size:15px;font-weight:700;color:var(--text);line-height:1.35">Belum absen hari ini</p>
+                        <div id="today-attendance-card" class="card" style="padding:14px 15px;background:var(--red-dim);border-color:rgba(255,107,107,0.2)">
+                            <p class="label-xs" id="today-attendance-label" style="margin-bottom:8px;color:var(--red)">Absen Hari Ini</p>
+                            <p id="today-attendance-info" style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:800;color:var(--red);line-height:1">--:--</p>
                         </div>
                     </div>
 
@@ -1583,13 +1618,7 @@
                     </button>
                 </div>`;
                 await updatePosStatus();
-                setTimeout(()=>{
-                    const ai=document.getElementById('pos-amount');
-                    if(ai){
-                        ai.addEventListener('input',function(){let v=this.value.replace(/\./g,'');if(v&&!isNaN(v)&&v.length>0){this.value=formatRupiah(parseInt(v));this.setAttribute('data-numeric',parseInt(v));}else{this.value='';this.setAttribute('data-numeric','0');}});
-                        ai.addEventListener('focus',function(){if(this.value===''||this.value==='Rp 0') this.value='';});
-                    }
-                },100);
+                setTimeout(()=>bindTransactionAmountFormatter('pos-amount'),100);
 
             } else if(page==='report'){
                 content.innerHTML=`
