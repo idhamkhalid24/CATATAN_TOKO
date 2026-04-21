@@ -1141,7 +1141,7 @@
             setAttendanceState({ hasClockedIn: false, lastDate: null });
         }
     };
-    function calculateBonus(o){ return Math.round((o||0)*0.01); }
+    function calculateBonus(o){ return Math.round((o||0)*0.015); }
     function getTodayAttendanceRecord(){
         const td=getTodayWIB();
         return cachedAttendance
