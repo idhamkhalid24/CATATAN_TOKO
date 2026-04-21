@@ -924,6 +924,7 @@
     let currentFilter = 'daily', rangeStartDate = null, rangeEndDate = null;
     let pendingClockInData = null, currentPage = 'home';
     let cachedTransactions = [], cachedAttendance = [];
+    let autoSyncIntervalId = null, backgroundSyncTimer = null, isSyncInProgress = false;
     const SYNC_INTERVAL = 30000;
     const SESSION_STORAGE_PREFIX = 'rocky_session_';
     const APP_DB_NAME = 'AttendancePOSDB';
@@ -1076,8 +1077,9 @@
         } catch(e){}
     };
     const syncFromServer = async (showMsg=false) => {
-        if(!currentUser) return;
+        if(!currentUser || isSyncInProgress) return;
         if(showMsg) showToast("Sinkronisasi...");
+        isSyncInProgress = true;
         try {
             const r=await fetch(`${GAS_WEB_APP_URL}?action=get&type=transactions&user=${currentUser.username}&t=${Date.now()}`);
             const d=await r.json();
@@ -1088,6 +1090,7 @@
             await syncAttendanceFromServer(false); await loadCache(); refreshCurrentPage();
             if(showMsg) showToast(`✓ Sinkron: ${cachedTransactions.length} transaksi`);
         } catch(e){ if(showMsg) showToast("Gagal sync",true); }
+        finally { isSyncInProgress = false; }
     };
     const syncAttendanceFromServer = async (showMsg=false) => {
         if(!currentUser) return;
@@ -1105,7 +1108,17 @@
             } return false;
         } catch(e){ if(showMsg) showToast("Gagal sync absensi",true); return false; }
     };
-    const startAutoSync = () => setInterval(async()=>{ if(currentUser&&navigator.onLine) await syncFromServer(false); },SYNC_INTERVAL);
+    const scheduleBackgroundSync = (delay=500, showMsg=false) => {
+        if(backgroundSyncTimer) clearTimeout(backgroundSyncTimer);
+        if(!currentUser || !navigator.onLine) return;
+        backgroundSyncTimer = setTimeout(async () => {
+            await syncFromServer(showMsg);
+        }, delay);
+    };
+    const startAutoSync = () => {
+        if(autoSyncIntervalId) clearInterval(autoSyncIntervalId);
+        autoSyncIntervalId = setInterval(async()=>{ if(currentUser&&navigator.onLine) await syncFromServer(false); },SYNC_INTERVAL);
+    };
     const refreshCurrentPage = async () => {
         if(currentPage==='home'){await updateBonusUI();await updateHomeStatus();}
         else if(currentPage==='history') await renderHistory();
@@ -1145,7 +1158,7 @@
         const oe=document.getElementById('total-omzet'),be=document.getElementById('bonus-text');
         const te=document.getElementById('today-income'),ae=document.getElementById('today-attendance-info'),me=document.getElementById('month-omzet');
         if(oe) oe.innerText=`Rp ${formatRupiah(bonus)}`;
-        if(be) be.innerText=` ${getNamaBulan(m)} · reset tiap bulan`;
+        if(be) be.innerText=`1% dari omzet ${getNamaBulan(m)} · reset tiap bulan`;
         const ac=document.getElementById('today-attendance-card'), al=document.getElementById('today-attendance-label');
         if(te) te.innerText=`Rp ${formatRupiah(pendapatanHariIni)}`;
         if(ae) ae.innerText=todayAttendance?formatWIBTime(todayAttendance.time).split(' ')[1].slice(0,5):'--:--';
@@ -1446,8 +1459,10 @@
                 setStoredCurrentUser(JSON.stringify({username:ud.username,pin:ud.pin}));
                 resetDailyAttendanceState();
                 await loadCache();
-                if(navigator.onLine) await syncFromServer(false);
-                showToast(`✓ Login ${ud.name}`); router.navigate('home');
+                router.navigate('home');
+                startAutoSync();
+                scheduleBackgroundSync(500, false);
+                showToast(`✓ Login ${ud.name}`);
             } else showToast("Username/PIN salah!",true);
         } catch(e){ showToast("Error login",true); }
         setLoading(false);
@@ -1568,7 +1583,7 @@
             <div class="bonus-card page-in s2">
                 <p style="font-size:9.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--amber);margin-bottom:5px;position:relative;z-index:1">Bonus Periode</p>
                 <p style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--text);position:relative;z-index:1">Rp ${formatRupiah(bonus)}</p>
-                <p style="font-size:9.5px;color:var(--text-ghost);margin-top:5px;position:relative;z-index:1"></p>
+                <p style="font-size:9.5px;color:var(--text-ghost);margin-top:5px;position:relative;z-index:1">Bonus 2% dari omzet periode aktif</p>
             </div>
             <div class="card page-in s3" style="padding:16px 18px">
                 <p class="label-xs">Daftar Hadir</p>
@@ -1814,7 +1829,7 @@
                     <div class="card page-in s3" style="padding:16px 16px;margin-bottom:10px">
                         <p class="label-xs" style="margin-bottom:8px">Bonus Bulan Ini</p>
                         <p id="total-omzet" style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:800;color:var(--accent);margin-bottom:6px">Rp 0</p>
-                        <p id="bonus-text" style="font-size:11px;color:var(--text-soft)"></p>
+                        <p id="bonus-text" style="font-size:11px;color:var(--text-soft)">1% dari omzet bulanan</p>
                         <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
                             <span style="font-size:11px;color:var(--text-soft)">Omzet bulan ini</span>
                             <strong id="month-omzet" style="font-size:12px;color:var(--text)">Rp 0</strong>
@@ -1976,10 +1991,15 @@
             await initDB();
             const fi=document.getElementById('import-user-file');
             if(fi) fi.addEventListener('change',handleUserFileUpload);
-            if(await checkExistingSession()){ router.navigate('home'); startAutoSync(); setTimeout(()=>syncFromServer(false),2000); }
-            else router.navigate('login');
+            if(await checkExistingSession()){
+                router.navigate('home');
+                startAutoSync();
+                scheduleBackgroundSync(700, false);
+            } else {
+                router.navigate('login');
+            }
         } finally {
-            setTimeout(hideStartupOverlay, 650);
+            setTimeout(hideStartupOverlay, 180);
         }
     };
 </script>
