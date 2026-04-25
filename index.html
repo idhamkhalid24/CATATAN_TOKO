@@ -419,7 +419,7 @@
             <div id="rismaMonthBonus" class="num" style="font-size:24px;color:#c2410c">Rp 0</div>
             <div class="small" id="rismaMonthInfo" style="margin-top:2px">Omset bulan ini khusus username risma</div>
           </div>
-          <span class="chip" style="background:#ffedd5;color:#c2410c;border-color:#fed7aa">1.5%</span>
+          <span class="chip" style="background:#ffedd5;color:#c2410c;border-color:#fed7aa">FEE%</span>
         </div>
         <div class="grid2" style="margin-top:10px">
           <div class="stat" style="box-shadow:none"><span>Omset Bulan Ini</span><b id="rismaMonthTotal" class="num" style="color:#be185d">Rp 0</b></div>
@@ -1765,13 +1765,40 @@ async function addRismaTransaction(){
   }
 }
 
+async function getRismaUserPin(){
+  if(!firebaseDb)return '';
+  try{
+    const snap=await firebaseDb.collection('users').doc(RISMA_USERNAME).get();
+    if(!snap.exists)return '';
+    const user=snap.data()||{};
+    return String(user.pin||user.PIN||user.password||'').trim();
+  }catch(e){
+    console.error(e);
+    return '';
+  }
+}
+
 async function deleteRismaTransaction(docId){
   if(!firebaseDb||!docId)return;
   const target=rismaTodayRows.find(t=>t._docId===docId);
   if(!target||!isRismaTransaction(target)){showToast('Hanya transaksi Risma yang bisa dihapus dari menu ini');return;}
-  if(!confirm('Hapus transaksi Risma ini?'))return;
+
+  const amountText=formatRupiah(Number(target.amount||0));
+  const pin=prompt(`Hapus transaksi Risma ${amountText}?\nMasukkan PIN user Risma:`);
+  if(!pin)return;
+
   try{
-    await firebaseDb.collection('transactions').doc(docId).update({deleted:true,deletedAtMs:Date.now(),deletedBy:RISMA_USERNAME});
+    const rismaPin=await getRismaUserPin();
+    if(!rismaPin){showToast('PIN user Risma belum ada di Firebase users/risma', true);return;}
+    if(String(pin).trim()!==rismaPin){showToast('PIN Risma salah, transaksi tidak dihapus');return;}
+    if(!confirm('PIN benar. Lanjut hapus transaksi Risma ini?'))return;
+
+    await firebaseDb.collection('transactions').doc(docId).update({
+      deleted:true,
+      deletedAtMs:Date.now(),
+      deletedBy:RISMA_USERNAME,
+      deletedByName:RISMA_NAME
+    });
     showToast('Transaksi Risma dihapus');
   }catch(e){
     showToast('Gagal hapus: '+e.message);
