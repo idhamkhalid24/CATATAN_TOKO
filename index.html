@@ -75,6 +75,7 @@
     .cashout-badge.tabungan{background:#fef9c3;color:#854d0e}
     .cashout-badge.lainnya{background:#f3f4f6;color:#374151}
 
+    #nav-risma.active{background:#fce7f3;color:#be185d}
     /* === PIN HIDE MODAL === */
     .pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--green);background:transparent;transition:.15s}
     .pin-dot.filled{background:var(--green)}
@@ -384,9 +385,83 @@
         <div id="pendingUploadList" class="pending-upload-list"></div>
       </div>
     </section>
+
+    <!-- ===== HALAMAN KASIR RISMA ===== -->
+    <section id="pageRisma" class="page">
+      <div class="card" style="background:linear-gradient(135deg,#fff0f6,#ffe4f0);border-color:#f9a8d4;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="section-title" style="margin:0 0 3px;color:#be185d">👩‍💼 Kasir Risma</div>
+            <b style="font-size:15px">Input Penjualan Langsung</b>
+            <div class="small" style="margin-top:2px">Transaksi masuk ke Firebase secara real-time</div>
+          </div>
+          <div style="text-align:right">
+            <div id="rismaDateBadge" class="chip" style="background:#fce7f3;color:#be185d;border-color:#f9a8d4;font-size:11px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total hari ini -->
+      <div style="background:linear-gradient(135deg,#be185d,#9d174d);border-radius:18px;padding:14px;margin-bottom:10px;color:white;box-shadow:0 6px 18px rgba(190,24,93,.25)">
+        <div style="font-size:11px;opacity:.8;font-weight:900;text-transform:uppercase;letter-spacing:.5px">Total Penjualan Risma Hari Ini</div>
+        <div id="rismaTodayTotal" class="num" style="font-size:28px;margin:5px 0 3px">Rp 0</div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;opacity:.85">
+          <span><b id="rismaTodayCount">0</b> transaksi Risma</span>
+          <span id="rismaFirebaseStatus" style="font-weight:900">⏳ Menghubungkan...</span>
+        </div>
+      </div>
+
+      <!-- Bonus bulanan Risma -->
+      <div class="card" style="background:#fff7ed;border-color:#fed7aa;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+          <div>
+            <div class="section-title" style="margin:0 0 3px;color:#c2410c">🎁 Bonus Bulanan Risma</div>
+            <div id="rismaMonthBonus" class="num" style="font-size:24px;color:#c2410c">Rp 0</div>
+            <div class="small" id="rismaMonthInfo" style="margin-top:2px">Omset bulan ini khusus username risma</div>
+          </div>
+          <span class="chip" style="background:#ffedd5;color:#c2410c;border-color:#fed7aa">1.5%</span>
+        </div>
+        <div class="grid2" style="margin-top:10px">
+          <div class="stat" style="box-shadow:none"><span>Omset Bulan Ini</span><b id="rismaMonthTotal" class="num" style="color:#be185d">Rp 0</b></div>
+          <div class="stat" style="box-shadow:none"><span>Transaksi Bulan Ini</span><b id="rismaMonthCount" class="num" style="color:#c2410c">0</b></div>
+        </div>
+      </div>
+
+      <!-- Form input penjualan -->
+      <div class="card" style="margin-bottom:10px">
+        <div class="section-title" style="margin:0 0 8px;color:#be185d">+ Input Penjualan</div>
+        <div class="field">
+          <input type="text" id="rismaDesc" placeholder="Nama barang / keterangan (opsional)" style="border-color:#f9a8d4">
+        </div>
+        <div class="field amount-wrap">
+          <input type="number" id="rismaAmount" placeholder="Nominal (×1.000)" oninput="handleRismaAmountPreview(this)" style="font-size:21px;font-weight:900;padding-right:105px;border-color:#f9a8d4">
+          <span id="rismaAmountPreview" class="preview" style="color:#be185d"></span>
+        </div>
+        <button class="btn" id="rismaSaveBtn" style="background:linear-gradient(135deg,#be185d,#9d174d);font-size:15px" onclick="addRismaTransaction()">
+          💾 Simpan Penjualan
+        </button>
+      </div>
+
+      <!-- Riwayat transaksi hari ini -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <b style="font-size:13px">📋 Transaksi Hari Ini</b>
+          <button class="tab" style="font-size:10px;padding:5px 9px" onclick="refreshRismaToday()">↻ Refresh</button>
+        </div>
+        <div id="rismaTodayList" class="list" style="max-height:45vh;overflow-y:auto">
+          <div class="empty">Belum ada transaksi hari ini</div>
+        </div>
+      </div>
+    </section>
+
   </main>
   <button id="fabBtn" class="fab" onclick="openTransactionModal()" aria-label="Input transaksi">+</button>
-  <nav class="nav"><button id="nav-home" class="active" onclick="goPage('home')">Home</button><button id="nav-history" onclick="goPage('history')">Riwayat</button><button id="nav-firebase" onclick="goPage('firebase')">Firebase</button></nav>
+  <nav class="nav" style="grid-template-columns:repeat(4,1fr)">
+    <button id="nav-home" class="active" onclick="goPage('home')">🏠 Home</button>
+    <button id="nav-history" onclick="goPage('history')">📋 Riwayat</button>
+    <button id="nav-firebase" onclick="goPage('firebase')">🔥 Firebase</button>
+    <button id="nav-risma" onclick="goPage('risma')" style="color:#be185d">👩 Risma</button>
+  </nav>
 
 <script>
 const SUPABASE_URL='https://myxrvipyodadnldtomzs.supabase.co';
@@ -495,7 +570,7 @@ let firebaseDb=null,firebaseUnsub=null,todayFirebaseUnsub=null,firebaseUploadDat
 function $(id){return document.getElementById(id)}
 function isSupabaseConfigured(){return SUPABASE_URL&&SUPABASE_ANON_KEY&&!SUPABASE_URL.includes('ISI_')&&!SUPABASE_ANON_KEY.includes('ISI_')}
 function initSupabase(){if(!isSupabaseConfigured()){showToast('Supabase belum disetting');return false}supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);return true}
-function goPage(p){currentPage=p;['home','history','firebase'].forEach(x=>{ $('page'+x[0].toUpperCase()+x.slice(1)).classList.toggle('active',x===p); $('nav-'+x).classList.toggle('active',x===p)}); render(); if(p==='firebase')renderFirebaseUploadCard()}
+function goPage(p){currentPage=p;['home','history','firebase','risma'].forEach(x=>{ const pg=$('page'+x[0].toUpperCase()+x.slice(1)); if(pg)pg.classList.toggle('active',x===p); const nav=$('nav-'+x); if(nav)nav.classList.toggle('active',x===p)}); render(); if(p==='firebase')renderFirebaseUploadCard(); if(p==='risma')initRismaPage();}
 function openTransactionModal(){$('inputDate').value=getLocalDateString();$('transactionModal').classList.remove('hidden');setTimeout(()=>$('amount').focus(),80)}
 function closeTransactionModal(){$('transactionModal').classList.add('hidden')}
 function getZakatHistory(){return zakatHistory||[]}
@@ -1501,6 +1576,206 @@ function downloadXlsMonth(){
   const filename=`RockyHijab_${targetMonth}.xlsx`;
   XLSX.writeFile(wb,filename);
   showToast(`File ${filename} didownload`);
+}
+
+// =====================================================
+// KASIR RISMA — Input Penjualan Langsung ke Firebase
+// =====================================================
+const RISMA_USERNAME='risma';
+const RISMA_NAME='Risma';
+const RISMA_BONUS_RATE=0.015;
+let rismaFirebaseUnsub=null;
+let rismaMonthFirebaseUnsub=null;
+let rismaTodayRows=[];
+let rismaMonthRows=[];
+
+function isRismaTransaction(t){
+  const user=String(t?.user||t?.username||t?.kasir||'').trim().toLowerCase();
+  const name=String(t?.name||t?.kasirName||'').trim().toLowerCase();
+  return user===RISMA_USERNAME || name==='risma';
+}
+
+function getRismaRecordTime(t){
+  if(!t)return 0;
+  if(Number(t.createdAtMs||0))return Number(t.createdAtMs||0);
+  if(Number(t.timestamp||0))return Number(t.timestamp||0);
+  if(t.createdAt&&typeof t.createdAt.toDate==='function')return t.createdAt.toDate().getTime();
+  return Number(String(t._docId||'').replace(/\D/g,''))||0;
+}
+
+function handleRismaAmountPreview(input){
+  $('rismaAmountPreview').innerText=input.value?formatRupiah(getActualAmount(input.value)):'';
+}
+
+function initRismaPage(){
+  const badge=$('rismaDateBadge');
+  if(badge){
+    const d=new Date();
+    badge.innerText=d.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  }
+  startRismaFirebaseWatch();
+  startRismaMonthWatch();
+}
+
+function startRismaFirebaseWatch(){
+  if(!firebaseDb){
+    const st=$('rismaFirebaseStatus');
+    if(st)st.innerText='❌ Firebase tidak aktif';
+    return;
+  }
+  const today=getLocalDateString();
+  if(rismaFirebaseUnsub){rismaFirebaseUnsub();rismaFirebaseUnsub=null;}
+  // Query dikunci user=risma supaya transaksi user lain tidak masuk menu Risma.
+  const q=firebaseDb.collection('transactions').where('dateKey','==',today).where('user','==',RISMA_USERNAME);
+  rismaFirebaseUnsub=q.onSnapshot(snap=>{
+    rismaTodayRows=snap.docs.map(d=>({_docId:d.id,...d.data()})).filter(t=>!t.deleted&&isRismaTransaction(t));
+    renderRismaToday();
+    const st=$('rismaFirebaseStatus');
+    if(st)st.innerText='✅ Terhubung';
+  },err=>{
+    console.error(err);
+    // Fallback untuk data lama yang belum punya field user, tetap difilter lokal khusus Risma.
+    firebaseDb.collection('transactions').where('dateKey','==',today).get().then(snap=>{
+      rismaTodayRows=snap.docs.map(d=>({_docId:d.id,...d.data()})).filter(t=>!t.deleted&&isRismaTransaction(t));
+      renderRismaToday();
+      const st=$('rismaFirebaseStatus');
+      if(st)st.innerText='✅ Terhubung';
+    }).catch(e=>{
+      console.error(e);
+      const st=$('rismaFirebaseStatus');
+      if(st)st.innerText='❌ Gagal konek';
+    });
+  });
+}
+
+function startRismaMonthWatch(){
+  if(!firebaseDb)return;
+  const month=getLocalDateString().slice(0,7);
+  if(rismaMonthFirebaseUnsub){rismaMonthFirebaseUnsub();rismaMonthFirebaseUnsub=null;}
+  // Ringkasan bonus bulanan khusus username risma.
+  const q=firebaseDb.collection('transactions').where('monthKey','==',month).where('user','==',RISMA_USERNAME);
+  rismaMonthFirebaseUnsub=q.onSnapshot(snap=>{
+    rismaMonthRows=snap.docs.map(d=>({_docId:d.id,...d.data()})).filter(t=>!t.deleted&&isRismaTransaction(t));
+    renderRismaMonthBonus();
+  },err=>{
+    console.error(err);
+    // Fallback untuk data lama yang belum punya monthKey atau user.
+    const start=month+'-01', end=month+'-31';
+    firebaseDb.collection('transactions').where('dateKey','>=',start).where('dateKey','<=',end).get().then(snap=>{
+      rismaMonthRows=snap.docs.map(d=>({_docId:d.id,...d.data()})).filter(t=>!t.deleted&&isRismaTransaction(t));
+      renderRismaMonthBonus();
+    }).catch(e=>console.error(e));
+  });
+}
+
+function refreshRismaToday(){
+  if(rismaFirebaseUnsub){rismaFirebaseUnsub();rismaFirebaseUnsub=null;}
+  if(rismaMonthFirebaseUnsub){rismaMonthFirebaseUnsub();rismaMonthFirebaseUnsub=null;}
+  startRismaFirebaseWatch();
+  startRismaMonthWatch();
+  showToast('Data Risma direfresh');
+}
+
+function renderRismaMonthBonus(){
+  const total=rismaMonthRows.reduce((a,b)=>a+Number(b.amount||0),0);
+  const count=rismaMonthRows.length;
+  const bonus=Math.round(total*RISMA_BONUS_RATE);
+  if($('rismaMonthTotal'))$('rismaMonthTotal').innerText=formatRupiah(total);
+  if($('rismaMonthCount'))$('rismaMonthCount').innerText=count;
+  if($('rismaMonthBonus'))$('rismaMonthBonus').innerText=formatRupiah(bonus);
+  if($('rismaMonthInfo'))$('rismaMonthInfo').innerText=`${getLocalDateString().slice(0,7)} · ${count} transaksi khusus Risma`;
+}
+
+function renderRismaToday(){
+  const total=rismaTodayRows.reduce((a,b)=>a+Number(b.amount||0),0);
+  const count=rismaTodayRows.length;
+  const totalEl=$('rismaTodayTotal');
+  const countEl=$('rismaTodayCount');
+  if(totalEl)totalEl.innerText=formatRupiah(total);
+  if(countEl)countEl.innerText=count;
+
+  const list=$('rismaTodayList');
+  if(!list)return;
+  if(!rismaTodayRows.length){
+    list.innerHTML='<div class="empty">Belum ada transaksi Risma hari ini</div>';
+    return;
+  }
+  const sorted=[...rismaTodayRows].sort((a,b)=>getRismaRecordTime(b)-getRismaRecordTime(a));
+  list.innerHTML=sorted.map(t=>{
+    const desc=t.description||t.desc||t.keterangan||t.note||'Penjualan';
+    const ms=getRismaRecordTime(t);
+    const waktu=ms?new Date(ms).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):'--:--';
+    return `<div class="item">
+      <div class="left">
+        <div class="icon in" style="background:#fce7f3;color:#be185d">💰</div>
+        <div class="desc">
+          <b>${escapeHtml(desc)}</b>
+          <small>${waktu} · username ${RISMA_USERNAME} · ${RISMA_NAME}</small>
+        </div>
+      </div>
+      <div class="right">
+        <b class="num" style="color:#be185d">+${formatRupiah(t.amount).replace('Rp\u00a0','Rp ')}</b>
+        <button onclick="deleteRismaTransaction('${t._docId}')" style="display:block;background:transparent;color:#d1d5d0;font-size:16px;padding:2px 0;margin-top:2px;border:none;cursor:pointer">×</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function addRismaTransaction(){
+  if(!firebaseDb){showToast('Firebase tidak aktif');return;}
+  const amountRaw=$('rismaAmount').value;
+  const amount=getActualAmount(amountRaw);
+  if(!amount||amount<=0){showToast('Nominal tidak valid');return;}
+  const descInput=$('rismaDesc').value.trim();
+  const desc=descInput||'Penjualan';
+  const today=getLocalDateString();
+  const now=Date.now();
+
+  const btn=$('rismaSaveBtn');
+  if(btn){btn.disabled=true;btn.innerText='Menyimpan...';}
+
+  try{
+    await firebaseDb.collection('transactions').add({
+      user:RISMA_USERNAME,
+      username:RISMA_USERNAME,
+      name:RISMA_NAME,
+      dateKey:today,
+      monthKey:today.slice(0,7),
+      amount:amount,
+      description:desc,
+      keterangan:desc,
+      note:desc,
+      kasir:RISMA_USERNAME,
+      kasirName:RISMA_NAME,
+      createdAtMs:now,
+      timestamp:now,
+      deleted:false,
+      type:'income',
+      source:'risma_direct'
+    });
+    $('rismaAmount').value='';
+    $('rismaDesc').value='';
+    $('rismaAmountPreview').innerText='';
+    showToast('✅ Penjualan Risma tersimpan!');
+  }catch(e){
+    showToast('Gagal simpan: '+e.message);
+    console.error(e);
+  }finally{
+    if(btn){btn.disabled=false;btn.innerText='💾 Simpan Penjualan';}
+  }
+}
+
+async function deleteRismaTransaction(docId){
+  if(!firebaseDb||!docId)return;
+  const target=rismaTodayRows.find(t=>t._docId===docId);
+  if(!target||!isRismaTransaction(target)){showToast('Hanya transaksi Risma yang bisa dihapus dari menu ini');return;}
+  if(!confirm('Hapus transaksi Risma ini?'))return;
+  try{
+    await firebaseDb.collection('transactions').doc(docId).update({deleted:true,deletedAtMs:Date.now(),deletedBy:RISMA_USERNAME});
+    showToast('Transaksi Risma dihapus');
+  }catch(e){
+    showToast('Gagal hapus: '+e.message);
+  }
 }
 
 async function initApp(){try{if(!initSupabase())return;
