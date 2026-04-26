@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>alfajri Finance v23 Sync Firebase</title>
+  <title>alfajri Finance v34 Sync Bonus Risma</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
@@ -1662,11 +1662,16 @@ function downloadXlsMonth(){
 // =====================================================
 const RISMA_USERNAME='risma';
 const RISMA_NAME='Risma';
-const RISMA_BONUS_RATE=0.015;
+const DEFAULT_RISMA_BONUS_RATE=0.015;
+const DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE=100;
+let rismaBonusSettings={transactionBonusRate:DEFAULT_RISMA_BONUS_RATE,closingBonusPerMinute:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE};
 let rismaFirebaseUnsub=null;
 let rismaMonthFirebaseUnsub=null;
+let rismaClosingUnsub=null;
+let rismaBonusSettingsUnsub=null;
 let rismaTodayRows=[];
 let rismaMonthRows=[];
+let rismaClosingRows=[];
 
 function isRismaTransaction(t){
   const user=String(t?.user||t?.username||t?.kasir||'').trim().toLowerCase();
@@ -1682,6 +1687,32 @@ function getRismaRecordTime(t){
   return Number(String(t._docId||'').replace(/\D/g,''))||0;
 }
 
+function getRismaTransactionBonusRate(){
+  const rate=Number(rismaBonusSettings?.transactionBonusRate);
+  return Number.isFinite(rate)&&rate>=0?rate:DEFAULT_RISMA_BONUS_RATE;
+}
+function getRismaClosingBonusPerMinute(){
+  const amount=Number(rismaBonusSettings?.closingBonusPerMinute);
+  return Number.isFinite(amount)&&amount>=0?amount:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE;
+}
+function normalizeRismaMonthKey(value){
+  return String(value||'').slice(0,7);
+}
+function getRismaClosingBonusForRecord(c){
+  if(!c || !(c.closed===true || c.closed==='true'))return 0;
+  const byUser=c.bonusByUser||{};
+  const storedForRisma=Number(byUser[RISMA_USERNAME]||0);
+  const delay=Number(c.delayMinutes||0);
+  if(Number.isFinite(delay)&&delay>0)return Math.round(delay*getRismaClosingBonusPerMinute());
+  if(Number.isFinite(storedForRisma)&&storedForRisma>0)return storedForRisma;
+  return Number(c.bonusPerUser||0)||0;
+}
+function getRismaMonthlyClosingBonus(month=getLocalDateString().slice(0,7)){
+  return rismaClosingRows
+    .filter(c=>c && (c.closed===true || c.closed==='true') && normalizeRismaMonthKey(c.monthKey||c.dateKey)===month)
+    .reduce((sum,c)=>sum+getRismaClosingBonusForRecord(c),0);
+}
+
 function handleRismaAmountPreview(input){
   $('rismaAmountPreview').innerText=input.value?formatRupiah(getActualAmount(input.value)):'';
 }
@@ -1694,6 +1725,8 @@ function initRismaPage(){
   }
   startRismaFirebaseWatch();
   startRismaMonthWatch();
+  startRismaClosingWatch();
+  startRismaBonusSettingsWatch();
 }
 
 function startRismaFirebaseWatch(){
@@ -1747,22 +1780,68 @@ function startRismaMonthWatch(){
   });
 }
 
+
+function startRismaClosingWatch(){
+  if(!firebaseDb)return;
+  const month=getLocalDateString().slice(0,7);
+  if(rismaClosingUnsub){rismaClosingUnsub();rismaClosingUnsub=null;}
+  const q=firebaseDb.collection('closings').where('monthKey','==',month);
+  rismaClosingUnsub=q.onSnapshot(snap=>{
+    rismaClosingRows=snap.docs.map(d=>({_docId:d.id,...(d.data()||{})}))
+      .filter(c=>c._docId!=='__bonus_settings'&&c.dateKey!=='__bonus_settings'&&c.type!=='bonus_settings');
+    renderRismaMonthBonus();
+  },err=>{
+    console.warn('Watch closing Risma gagal, pakai fallback:',err);
+    firebaseDb.collection('closings').get().then(snap=>{
+      rismaClosingRows=snap.docs.map(d=>({_docId:d.id,...(d.data()||{})}))
+        .filter(c=>c._docId!=='__bonus_settings'&&c.dateKey!=='__bonus_settings'&&c.type!=='bonus_settings'&&normalizeRismaMonthKey(c.monthKey||c.dateKey)===month);
+      renderRismaMonthBonus();
+    }).catch(e=>console.error(e));
+  });
+}
+
+function startRismaBonusSettingsWatch(){
+  if(!firebaseDb)return;
+  if(rismaBonusSettingsUnsub){rismaBonusSettingsUnsub();rismaBonusSettingsUnsub=null;}
+  rismaBonusSettingsUnsub=firebaseDb.collection('closings').doc('__bonus_settings').onSnapshot(doc=>{
+    if(doc.exists){
+      const data=doc.data()||{};
+      rismaBonusSettings={
+        transactionBonusRate:Number.isFinite(Number(data.transactionBonusRate))?Number(data.transactionBonusRate):DEFAULT_RISMA_BONUS_RATE,
+        closingBonusPerMinute:Number.isFinite(Number(data.closingBonusPerMinute))?Number(data.closingBonusPerMinute):DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE,
+        updatedAtMs:Number(data.updatedAtMs||0),
+        updatedByName:data.updatedByName||''
+      };
+    }else{
+      rismaBonusSettings={transactionBonusRate:DEFAULT_RISMA_BONUS_RATE,closingBonusPerMinute:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE};
+    }
+    renderRismaMonthBonus();
+  },err=>console.warn('Watch kontrol bonus Risma gagal:',err));
+}
+
 function refreshRismaToday(){
   if(rismaFirebaseUnsub){rismaFirebaseUnsub();rismaFirebaseUnsub=null;}
   if(rismaMonthFirebaseUnsub){rismaMonthFirebaseUnsub();rismaMonthFirebaseUnsub=null;}
+  if(rismaClosingUnsub){rismaClosingUnsub();rismaClosingUnsub=null;}
+  if(rismaBonusSettingsUnsub){rismaBonusSettingsUnsub();rismaBonusSettingsUnsub=null;}
   startRismaFirebaseWatch();
   startRismaMonthWatch();
+  startRismaClosingWatch();
+  startRismaBonusSettingsWatch();
   showToast('Data Risma direfresh');
 }
 
 function renderRismaMonthBonus(){
+  const month=getLocalDateString().slice(0,7);
   const total=rismaMonthRows.reduce((a,b)=>a+Number(b.amount||0),0);
   const count=rismaMonthRows.length;
-  const bonus=Math.round(total*RISMA_BONUS_RATE);
+  const bonusTransaksi=Math.round(total*getRismaTransactionBonusRate());
+  const bonusClosing=getRismaMonthlyClosingBonus(month);
+  const totalBonus=bonusTransaksi+bonusClosing;
   if($('rismaMonthTotal'))$('rismaMonthTotal').innerText=formatRupiah(total);
   if($('rismaMonthCount'))$('rismaMonthCount').innerText=count;
-  if($('rismaMonthBonus'))$('rismaMonthBonus').innerText=formatRupiah(bonus);
-  if($('rismaMonthInfo'))$('rismaMonthInfo').innerText=`${getLocalDateString().slice(0,7)} · ${count} transaksi khusus Risma`;
+  if($('rismaMonthBonus'))$('rismaMonthBonus').innerText=formatRupiah(totalBonus);
+  if($('rismaMonthInfo'))$('rismaMonthInfo').innerText=`${month} · transaksi Rp ${formatRupiah(bonusTransaksi)} + closing Rp ${formatRupiah(bonusClosing)}`;
 }
 
 function renderRismaToday(){
@@ -1800,8 +1879,76 @@ function renderRismaToday(){
   }).join('');
 }
 
+
+async function getRismaTodayClosing(){
+  if(!firebaseDb)return null;
+  const today=getLocalDateString();
+  try{
+    const doc=await firebaseDb.collection('closings').doc(today).get();
+    if(doc.exists){
+      const data=doc.data()||{};
+      if(data.closed===true || data.closed==='true')return {id:doc.id,...data};
+    }
+  }catch(e){
+    console.warn('Cek closing doc gagal:',e);
+  }
+  try{
+    const snap=await firebaseDb.collection('closings').where('dateKey','==',today).get();
+    const found=snap.docs.map(d=>({id:d.id,...(d.data()||{})})).find(c=>c.closed===true || c.closed==='true');
+    return found||null;
+  }catch(e){
+    console.warn('Cek closing query gagal:',e);
+    return null;
+  }
+}
+
+async function hasRismaClockedInToday(){
+  if(!firebaseDb)return false;
+  const today=getLocalDateString();
+  try{
+    const snap=await firebaseDb.collection('attendance')
+      .where('user','==',RISMA_USERNAME)
+      .where('dateKey','==',today)
+      .get();
+    return snap.docs.some(d=>{
+      const a=d.data()||{};
+      return a.deleted!==true && a.deleted!=='true';
+    });
+  }catch(e){
+    console.warn('Cek absen Risma query utama gagal:',e);
+    try{
+      const snap=await firebaseDb.collection('attendance').where('dateKey','==',today).get();
+      return snap.docs.some(d=>{
+        const a=d.data()||{};
+        const user=String(a.user||a.username||'').trim().toLowerCase();
+        const name=String(a.name||'').trim().toLowerCase();
+        return (user===RISMA_USERNAME || name==='risma') && a.deleted!==true && a.deleted!=='true';
+      });
+    }catch(err){
+      console.warn('Cek absen Risma fallback gagal:',err);
+      return false;
+    }
+  }
+}
+
+async function validateRismaCanTransact(){
+  const closing=await getRismaTodayClosing();
+  if(closing){
+    showToast('Transaksi Risma sudah closing hari ini. Terbuka otomatis besok.');
+    return false;
+  }
+  const attended=await hasRismaClockedInToday();
+  if(!attended){
+    showToast('Risma harus absen dulu sebelum transaksi.');
+    return false;
+  }
+  return true;
+}
+
 async function addRismaTransaction(){
   if(!firebaseDb){showToast('Firebase tidak aktif');return;}
+  const canSave=await validateRismaCanTransact();
+  if(!canSave)return;
   const amountRaw=$('rismaAmount').value;
   const amount=getActualAmount(amountRaw);
   if(!amount||amount<=0){showToast('Nominal tidak valid');return;}
