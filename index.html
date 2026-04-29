@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>alfajri Finance v35 Sync Firebase Baru</title>
+  <title>alfajri Finance v36 Selaras Index</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
@@ -1698,17 +1698,58 @@ let rismaFirebaseUnsub=null;
 let rismaMonthFirebaseUnsub=null;
 let rismaClosingUnsub=null;
 let rismaBonusSettingsUnsub=null;
+let rismaManualBonusUnsub=null;
+let rismaUserUnsub=null;
 let rismaTodayRows=[];
 let rismaMonthRows=[];
 let rismaClosingRows=[];
+let rismaManualBonusRows=[];
+let rismaUserProfile=null;
 
+function normalizeRismaUsername(value){
+  return String(value||'').trim().toLowerCase();
+}
+function getRismaDisplayName(){
+  return String(rismaUserProfile?.name||RISMA_NAME||RISMA_USERNAME).trim()||RISMA_NAME;
+}
+function getCompatServerTimestamp(){
+  try{
+    if(window.firebase&&firebase.firestore&&firebase.firestore.FieldValue&&firebase.firestore.FieldValue.serverTimestamp){
+      return firebase.firestore.FieldValue.serverTimestamp();
+    }
+  }catch(e){}
+  return new Date();
+}
 function isRismaTransaction(t){
-  const user=String(t?.user||t?.username||t?.kasir||'').trim().toLowerCase();
-  const name=String(t?.name||t?.kasirName||'').trim().toLowerCase();
+  const user=normalizeRismaUsername(t?.user||t?.username||t?.kasir);
+  const name=normalizeRismaUsername(t?.name||t?.kasirName);
   return user===RISMA_USERNAME || name==='risma';
 }
 function normalizeRismaRows(rows){
   return normalizeFirebaseRows(rows||[]).filter(t=>isRismaTransaction(t));
+}
+function isRismaDailyEmployee(){
+  const role=normalizeRismaUsername(rismaUserProfile?.role||'staff');
+  return ['harian','daily','karyawan_harian'].includes(role);
+}
+function isRismaManualBonus(b){
+  if(!b||isFirebaseRecordDeleted(b))return false;
+  const amount=Number(b.amount||0);
+  if(!Number.isFinite(amount)||amount===0)return false;
+  const user=normalizeRismaUsername(b.user||b.username||b.kasir);
+  const name=normalizeRismaUsername(b.name||b.kasirName);
+  return user===RISMA_USERNAME || name==='risma';
+}
+function getRismaManualBonusMonth(b){
+  const fromMonth=String(b?.monthKey||'').slice(0,7);
+  if(fromMonth)return fromMonth;
+  const dk=getFirebaseRecordDateKey(b);
+  return dk?dk.slice(0,7):'';
+}
+function getRismaMonthlyManualBonus(month=getLocalDateString().slice(0,7)){
+  return (rismaManualBonusRows||[])
+    .filter(b=>isRismaManualBonus(b)&&getRismaManualBonusMonth(b)===month)
+    .reduce((sum,b)=>sum+Number(b.amount||0),0);
 }
 
 function getRismaRecordTime(t){
@@ -1721,6 +1762,12 @@ function getRismaRecordTime(t){
 }
 
 function getRismaTransactionBonusRate(){
+  if(isRismaDailyEmployee()){
+    const dailyRate=Number(rismaUserProfile?.dailyBonusRate);
+    if(Number.isFinite(dailyRate)&&dailyRate>=0)return dailyRate;
+    const dailyPercent=Number(rismaUserProfile?.dailyBonusPercent);
+    if(Number.isFinite(dailyPercent)&&dailyPercent>=0)return dailyPercent/100;
+  }
   const rate=Number(rismaBonusSettings?.transactionBonusRate);
   return Number.isFinite(rate)&&rate>=0?rate:DEFAULT_RISMA_BONUS_RATE;
 }
@@ -1734,11 +1781,16 @@ function normalizeRismaMonthKey(value){
 function getRismaClosingBonusForRecord(c){
   if(!c || !(c.closed===true || c.closed==='true'))return 0;
   const byUser=c.bonusByUser||{};
-  const storedForRisma=Number(byUser[RISMA_USERNAME]||0);
+  if(Object.prototype.hasOwnProperty.call(byUser,RISMA_USERNAME)){
+    return Number(byUser[RISMA_USERNAME]||0);
+  }
+  const storedPerUser=Number(c.bonusPerUser||0);
+  if(Number.isFinite(storedPerUser)&&storedPerUser>=0)return storedPerUser;
+  const totalBonus=Number(c.totalBonus||0),totalUsers=Number(c.totalUsers||0);
+  if(Number.isFinite(totalBonus)&&totalBonus>0&&Number.isFinite(totalUsers)&&totalUsers>0)return Math.round(totalBonus/totalUsers);
   const delay=Number(c.delayMinutes||0);
   if(Number.isFinite(delay)&&delay>0)return Math.round(delay*getRismaClosingBonusPerMinute());
-  if(Number.isFinite(storedForRisma)&&storedForRisma>0)return storedForRisma;
-  return Number(c.bonusPerUser||0)||0;
+  return 0;
 }
 function getRismaMonthlyClosingBonus(month=getLocalDateString().slice(0,7)){
   return rismaClosingRows
@@ -1756,9 +1808,11 @@ function initRismaPage(){
     const d=new Date();
     badge.innerText=d.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
   }
+  startRismaUserWatch();
   startRismaFirebaseWatch();
   startRismaMonthWatch();
   startRismaClosingWatch();
+  startRismaManualBonusWatch();
   startRismaBonusSettingsWatch();
 }
 
@@ -1852,14 +1906,57 @@ function startRismaBonusSettingsWatch(){
   },err=>console.warn('Watch kontrol bonus Risma gagal:',err));
 }
 
+function startRismaUserWatch(){
+  if(!firebaseDb)return;
+  if(rismaUserUnsub){rismaUserUnsub();rismaUserUnsub=null;}
+  try{
+    rismaUserUnsub=firebaseDb.collection('users').doc(RISMA_USERNAME).onSnapshot(doc=>{
+      rismaUserProfile=doc.exists?{_docId:doc.id,...(doc.data()||{})}:null;
+      renderRismaToday();
+      renderRismaMonthBonus();
+    },err=>console.warn('Watch user Risma gagal:',err));
+  }catch(e){
+    console.warn('Init user Risma watch gagal:',e);
+  }
+}
+
+function startRismaManualBonusWatch(){
+  if(!firebaseDb)return;
+  const month=getLocalDateString().slice(0,7);
+  if(rismaManualBonusUnsub){rismaManualBonusUnsub();rismaManualBonusUnsub=null;}
+  try{
+    // Selaras dengan index: manual bonus tersimpan di collection manualBonuses dengan field monthKey + user.
+    // Query monthKey saja supaya tidak butuh composite index; filter user dilakukan lokal.
+    const q=firebaseDb.collection('manualBonuses').where('monthKey','==',month);
+    rismaManualBonusUnsub=q.onSnapshot(snap=>{
+      rismaManualBonusRows=snap.docs.map(d=>({_docId:d.id,id:d.id,...(d.data()||{})})).filter(isRismaManualBonus);
+      renderRismaMonthBonus();
+    },err=>{
+      console.warn('Watch manual bonus Risma gagal, pakai fallback:',err);
+      firebaseDb.collection('manualBonuses').get().then(snap=>{
+        rismaManualBonusRows=snap.docs
+          .map(d=>({_docId:d.id,id:d.id,...(d.data()||{})}))
+          .filter(b=>isRismaManualBonus(b)&&getRismaManualBonusMonth(b)===month);
+        renderRismaMonthBonus();
+      }).catch(e=>console.warn('Fallback manual bonus Risma gagal:',e));
+    });
+  }catch(e){
+    console.warn('Init manual bonus Risma watch gagal:',e);
+  }
+}
+
 function refreshRismaToday(){
   if(rismaFirebaseUnsub){rismaFirebaseUnsub();rismaFirebaseUnsub=null;}
   if(rismaMonthFirebaseUnsub){rismaMonthFirebaseUnsub();rismaMonthFirebaseUnsub=null;}
   if(rismaClosingUnsub){rismaClosingUnsub();rismaClosingUnsub=null;}
+  if(rismaManualBonusUnsub){rismaManualBonusUnsub();rismaManualBonusUnsub=null;}
   if(rismaBonusSettingsUnsub){rismaBonusSettingsUnsub();rismaBonusSettingsUnsub=null;}
+  if(rismaUserUnsub){rismaUserUnsub();rismaUserUnsub=null;}
+  startRismaUserWatch();
   startRismaFirebaseWatch();
   startRismaMonthWatch();
   startRismaClosingWatch();
+  startRismaManualBonusWatch();
   startRismaBonusSettingsWatch();
   showToast('Data Risma direfresh');
 }
@@ -1868,13 +1965,17 @@ function renderRismaMonthBonus(){
   const month=getLocalDateString().slice(0,7);
   const total=rismaMonthRows.reduce((a,b)=>a+Number(b.amount||0),0);
   const count=rismaMonthRows.length;
-  const bonusTransaksi=Math.round(total*getRismaTransactionBonusRate());
+  const bonusTransaksi=Math.round(rismaMonthRows.reduce((sum,t)=>sum+(Number(t.amount||0)*getRismaTransactionBonusRate()),0));
   const bonusClosing=getRismaMonthlyClosingBonus(month);
-  const totalBonus=bonusTransaksi+bonusClosing;
+  const bonusManual=getRismaMonthlyManualBonus(month);
+  const totalBonus=bonusTransaksi+bonusClosing+bonusManual;
   if($('rismaMonthTotal'))$('rismaMonthTotal').innerText=formatRupiah(total);
   if($('rismaMonthCount'))$('rismaMonthCount').innerText=count;
   if($('rismaMonthBonus'))$('rismaMonthBonus').innerText=formatRupiah(totalBonus);
-  if($('rismaMonthInfo'))$('rismaMonthInfo').innerText=`${month} · transaksi Rp ${formatRupiah(bonusTransaksi)} + closing Rp ${formatRupiah(bonusClosing)}`;
+  if($('rismaMonthInfo')){
+    const manualText=bonusManual<0?`manual -${formatRupiah(Math.abs(bonusManual))}`:`manual ${formatRupiah(bonusManual)}`;
+    $('rismaMonthInfo').innerText=`${month} · transaksi ${formatRupiah(bonusTransaksi)} + closing ${formatRupiah(bonusClosing)} + ${manualText}`;
+  }
 }
 
 function renderRismaToday(){
@@ -1901,7 +2002,7 @@ function renderRismaToday(){
         <div class="icon in" style="background:#fce7f3;color:#be185d">💰</div>
         <div class="desc">
           <b>${escapeHtml(desc)}</b>
-          <small>${waktu} · username ${RISMA_USERNAME} · ${RISMA_NAME}</small>
+          <small>${waktu} · username ${RISMA_USERNAME} · ${escapeHtml(getRismaDisplayName())}</small>
         </div>
       </div>
       <div class="right">
@@ -2004,7 +2105,7 @@ async function addRismaTransaction(){
     await firebaseDb.collection('transactions').add({
       user:RISMA_USERNAME,
       username:RISMA_USERNAME,
-      name:RISMA_NAME,
+      name:getRismaDisplayName(),
       dateKey:today,
       monthKey:today.slice(0,7),
       amount:amount,
@@ -2012,7 +2113,8 @@ async function addRismaTransaction(){
       keterangan:desc,
       note:desc,
       kasir:RISMA_USERNAME,
-      kasirName:RISMA_NAME,
+      kasirName:getRismaDisplayName(),
+      createdAt:getCompatServerTimestamp(),
       createdAtMs:now,
       timestamp:now,
       deleted:false,
@@ -2061,9 +2163,10 @@ async function deleteRismaTransaction(docId){
 
     await firebaseDb.collection('transactions').doc(docId).update({
       deleted:true,
+      deletedAt:getCompatServerTimestamp(),
       deletedAtMs:Date.now(),
       deletedBy:RISMA_USERNAME,
-      deletedByName:RISMA_NAME
+      deletedByName:getRismaDisplayName()
     });
     showToast('Transaksi Risma dihapus');
   }catch(e){
