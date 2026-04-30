@@ -1768,6 +1768,15 @@ function normalizeRismaUsername(value){
 function getRismaDisplayName(){
   return String(rismaUserProfile?.name||RISMA_NAME||RISMA_USERNAME).trim()||RISMA_NAME;
 }
+function hasRismaBonusValue(v){
+  return v!==undefined&&v!==null&&String(v).trim()!=='';
+}
+function getRismaUserRole(profile=rismaUserProfile){
+  return normalizeRismaUsername(profile?.role||'staff')||'staff';
+}
+function getRismaBonusGroup(profile=rismaUserProfile){
+  return getRismaUserRole(profile)==='harian'?'harian':'staff';
+}
 function getCompatServerTimestamp(){
   try{
     if(window.firebase&&firebase.firestore&&firebase.firestore.FieldValue&&firebase.firestore.FieldValue.serverTimestamp){
@@ -1784,8 +1793,8 @@ function isRismaTransaction(t){
 function normalizeRismaRows(rows){
   return normalizeFirebaseRows(rows||[]).filter(t=>isRismaTransaction(t));
 }
-function isRismaDailyEmployee(){
-  const role=normalizeRismaUsername(rismaUserProfile?.role||'staff');
+function isRismaDailyEmployee(profile=rismaUserProfile){
+  const role=getRismaUserRole(profile);
   return ['harian','daily','karyawan_harian'].includes(role);
 }
 function isRismaManualBonus(b){
@@ -1803,6 +1812,7 @@ function getRismaManualBonusMonth(b){
   return dk?dk.slice(0,7):'';
 }
 function getRismaMonthlyManualBonus(month=getLocalDateString().slice(0,7)){
+  if(isRismaDailyEmployee())return 0;
   return (rismaManualBonusRows||[])
     .filter(b=>isRismaManualBonus(b)&&getRismaManualBonusMonth(b)===month)
     .reduce((sum,b)=>sum+Number(b.amount||0),0);
@@ -1817,19 +1827,79 @@ function getRismaRecordTime(t){
   return Number(String(t._docId||'').replace(/\D/g,''))||0;
 }
 
-function getRismaTransactionBonusRate(){
-  if(isRismaDailyEmployee()){
-    const dailyRate=Number(rismaUserProfile?.dailyBonusRate);
-    if(Number.isFinite(dailyRate)&&dailyRate>=0)return dailyRate;
-    const dailyPercent=Number(rismaUserProfile?.dailyBonusPercent);
-    if(Number.isFinite(dailyPercent)&&dailyPercent>=0)return dailyPercent/100;
+function getRismaTransactionBonusRate(profile=rismaUserProfile){
+  if(profile){
+    if(hasRismaBonusValue(profile.transactionBonusRate)){
+      const rate=Number(profile.transactionBonusRate);
+      if(Number.isFinite(rate)&&rate>=0)return rate;
+    }
+    if(hasRismaBonusValue(profile.transactionBonusPercent)){
+      const percent=Number(profile.transactionBonusPercent);
+      if(Number.isFinite(percent)&&percent>=0)return percent/100;
+    }
+    if(isRismaDailyEmployee(profile)){
+      const dailyRate=Number(profile.dailyBonusRate);
+      if(Number.isFinite(dailyRate)&&dailyRate>=0)return dailyRate;
+      const dailyPercent=Number(profile.dailyBonusPercent);
+      if(Number.isFinite(dailyPercent)&&dailyPercent>=0)return dailyPercent/100;
+    }
   }
   const rate=Number(rismaBonusSettings?.transactionBonusRate);
   return Number.isFinite(rate)&&rate>=0?rate:DEFAULT_RISMA_BONUS_RATE;
 }
-function getRismaClosingBonusPerMinute(){
+function getRismaTransactionBonusPercent(profile=rismaUserProfile){
+  return Number((getRismaTransactionBonusRate(profile)*100).toFixed(3));
+}
+function getRismaClosingBonusPerMinute(profile=rismaUserProfile){
+  if(profile&&hasRismaBonusValue(profile.closingBonusPerMinute)){
+    const amount=Number(profile.closingBonusPerMinute);
+    if(Number.isFinite(amount)&&amount>=0)return amount;
+  }
   const amount=Number(rismaBonusSettings?.closingBonusPerMinute);
   return Number.isFinite(amount)&&amount>=0?amount:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE;
+}
+function getRismaBonusSnapshot(profile=rismaUserProfile){
+  const rate=getRismaTransactionBonusRate(profile);
+  return {
+    userRole:getRismaUserRole(profile),
+    bonusGroup:getRismaBonusGroup(profile),
+    transactionBonusRate:rate,
+    transactionBonusPercent:Number((rate*100).toFixed(3)),
+    closingBonusPerMinute:getRismaClosingBonusPerMinute(profile),
+    bonusLogicVersion:3
+  };
+}
+function getRismaTransactionSnapshotRate(t){
+  if(t){
+    if(hasRismaBonusValue(t.bonusRate)){const rate=Number(t.bonusRate);if(Number.isFinite(rate)&&rate>=0)return rate;}
+    if(hasRismaBonusValue(t.transactionBonusRate)){const rate=Number(t.transactionBonusRate);if(Number.isFinite(rate)&&rate>=0)return rate;}
+    if(hasRismaBonusValue(t.bonusPercent)){const percent=Number(t.bonusPercent);if(Number.isFinite(percent)&&percent>=0)return percent/100;}
+    if(hasRismaBonusValue(t.transactionBonusPercent)){const percent=Number(t.transactionBonusPercent);if(Number.isFinite(percent)&&percent>=0)return percent/100;}
+  }
+  return getRismaTransactionBonusRate();
+}
+async function fetchLatestRismaBonusBeforeSave(){
+  if(!firebaseDb)throw new Error('Firebase tidak aktif');
+  const [userSnap,bonusSnap]=await Promise.all([
+    firebaseDb.collection('users').doc(RISMA_USERNAME).get({source:'server'}),
+    firebaseDb.collection('closings').doc('__bonus_settings').get({source:'server'})
+  ]);
+  if(!userSnap.exists)throw new Error('User Risma tidak ditemukan saat cek bonus terbaru');
+  if(bonusSnap.exists){
+    const data=bonusSnap.data()||{};
+    rismaBonusSettings={
+      transactionBonusRate:Number.isFinite(Number(data.transactionBonusRate))?Number(data.transactionBonusRate):DEFAULT_RISMA_BONUS_RATE,
+      closingBonusPerMinute:Number.isFinite(Number(data.closingBonusPerMinute))?Number(data.closingBonusPerMinute):DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE,
+      updatedAtMs:Number(data.updatedAtMs||0),
+      updatedByName:data.updatedByName||''
+    };
+  }else{
+    rismaBonusSettings={transactionBonusRate:DEFAULT_RISMA_BONUS_RATE,closingBonusPerMinute:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE};
+  }
+  const freshUser={_docId:userSnap.id,username:userSnap.data().username||userSnap.id,...(userSnap.data()||{})};
+  if(freshUser.active===false||freshUser.deleted===true||freshUser.deleted==='true')throw new Error('User Risma sudah nonaktif');
+  rismaUserProfile=freshUser;
+  return {user:freshUser,snapshot:getRismaBonusSnapshot(freshUser)};
 }
 function normalizeRismaMonthKey(value){
   return String(value||'').slice(0,7);
@@ -2019,7 +2089,7 @@ function renderRismaMonthBonus(){
   const month=getLocalDateString().slice(0,7);
   const total=rismaMonthRows.reduce((a,b)=>a+Number(b.amount||0),0);
   const count=rismaMonthRows.length;
-  const bonusTransaksi=Math.round(rismaMonthRows.reduce((sum,t)=>sum+(Number(t.amount||0)*getRismaTransactionBonusRate()),0));
+  const bonusTransaksi=Math.round(rismaMonthRows.reduce((sum,t)=>sum+(Number(t.amount||0)*getRismaTransactionSnapshotRate(t)),0));
   const bonusClosing=getRismaMonthlyClosingBonus(month);
   const bonusManual=getRismaMonthlyManualBonus(month);
   const totalBonus=bonusTransaksi+bonusClosing+bonusManual;
@@ -2056,7 +2126,7 @@ function renderRismaToday(){
         <div class="icon in" style="background:#fce7f3;color:#be185d">💰</div>
         <div class="desc">
           <b>${escapeHtml(desc)}</b>
-          <small>${waktu} · username ${RISMA_USERNAME} · ${escapeHtml(getRismaDisplayName())}</small>
+          <small>${waktu} · username ${RISMA_USERNAME} · ${escapeHtml(getRismaDisplayName())} · bonus ${Number((getRismaTransactionSnapshotRate(t)*100).toFixed(3))}%</small>
         </div>
       </div>
       <div class="right">
@@ -2156,10 +2226,22 @@ async function addRismaTransaction(){
   if(btn){btn.disabled=true;btn.innerText='Menyimpan...';}
 
   try{
+    const latest=await fetchLatestRismaBonusBeforeSave();
+    const freshUser=latest.user||rismaUserProfile;
+    const bonusSnapshot=latest.snapshot||getRismaBonusSnapshot(freshUser);
+    const displayName=String(freshUser?.name||getRismaDisplayName()||RISMA_NAME).trim()||RISMA_NAME;
     await firebaseDb.collection('transactions').add({
       user:RISMA_USERNAME,
       username:RISMA_USERNAME,
-      name:getRismaDisplayName(),
+      name:displayName,
+      userRole:bonusSnapshot.userRole,
+      bonusGroup:bonusSnapshot.bonusGroup,
+      bonusRate:bonusSnapshot.transactionBonusRate,
+      bonusPercent:bonusSnapshot.transactionBonusPercent,
+      transactionBonusRate:bonusSnapshot.transactionBonusRate,
+      transactionBonusPercent:bonusSnapshot.transactionBonusPercent,
+      closingBonusPerMinuteSnapshot:bonusSnapshot.closingBonusPerMinute,
+      bonusLogicVersion:bonusSnapshot.bonusLogicVersion,
       dateKey:today,
       monthKey:today.slice(0,7),
       amount:amount,
@@ -2167,7 +2249,7 @@ async function addRismaTransaction(){
       keterangan:desc,
       note:desc,
       kasir:RISMA_USERNAME,
-      kasirName:getRismaDisplayName(),
+      kasirName:displayName,
       createdAt:getCompatServerTimestamp(),
       createdAtMs:now,
       timestamp:now,
