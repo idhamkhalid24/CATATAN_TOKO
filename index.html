@@ -2080,6 +2080,7 @@ function getRismaClosingBonusForRecord(c){
   // Karyawan harian/admin tidak dapat bonus closing, jadi jangan fallback ke bonusPerUser/totalBonus/delayMinutes.
   if(!c || !(c.closed===true || c.closed==='true'))return 0;
   if(!isRismaStaffEmployee())return 0;
+  if(isRismaClosingCanceledForUser(c,RISMA_USERNAME))return 0;
   const byUser=c.bonusByUser||{};
   if(Object.prototype.hasOwnProperty.call(byUser,RISMA_USERNAME)){
     const value=Number(byUser[RISMA_USERNAME]||0);
@@ -2156,12 +2157,25 @@ function getRismaManualClosingDocId(username,dateKey=getLocalDateString()){
   const u=normalizeRismaUsername(username);
   return `${String(dateKey||getLocalDateString()).slice(0,10)}_${u}`;
 }
+function getRismaCanceledUsersMap(c){
+  const raw=c?.canceledUsers||c?.canceledByUser||{};
+  if(Array.isArray(raw))return raw.reduce((acc,u)=>{const key=normalizeRismaUsername(u);if(key)acc[key]=true;return acc;},{});
+  return raw&&typeof raw==='object'?raw:{};
+}
+function isRismaClosingCanceledForUser(c,username){
+  const u=normalizeRismaUsername(username);
+  if(!c||!u)return false;
+  const canceled=getRismaCanceledUsersMap(c);
+  const value=canceled[u];
+  return value===true||value==='true'||!!(value&&typeof value==='object'&&value.canceled!==false);
+}
 function isRismaClosingRecordForTarget(c,username,dateKey=getLocalDateString()){
   if(!c || !(c.closed===true || c.closed==='true'))return false;
   if(c.canceled===true || c.canceled==='true' || isFirebaseRecordDeleted(c))return false;
   const d=String(c.dateKey||'').slice(0,10);
   if(d && d!==dateKey)return false;
   const target=normalizeRismaUsername(username);
+  if(isRismaClosingCanceledForUser(c,target))return false;
   const scope=normalizeRismaUsername(c.scope||'');
   const user=normalizeRismaUsername(c.user||c.username||'');
   const id=String(c.id||c._docId||'');
