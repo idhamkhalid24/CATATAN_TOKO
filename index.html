@@ -163,6 +163,49 @@
       .fab{right:14px!important;bottom:92px!important}
     }
 
+
+    /* === ANIMASI RISMA: TRANSAKSI PERTAMA & BONUS MIMIN === */
+    .risma-first-tx-party,.risma-manual-bonus-party{
+      position:fixed;inset:0;z-index:260;display:flex;align-items:center;justify-content:center;
+      background:rgba(15,23,42,.24);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+      pointer-events:auto;opacity:0;transition:opacity .18s ease;padding:16px;
+    }
+    .risma-first-tx-party.show,.risma-manual-bonus-party.show{opacity:1}
+    .risma-party-box{
+      position:relative;width:min(330px,calc(100% - 28px));border-radius:26px;padding:18px 15px 16px;
+      text-align:center;color:#fff;box-shadow:0 24px 65px rgba(15,23,42,.38);overflow:hidden;
+      animation:rismaPartyPop .32s cubic-bezier(.2,1.2,.3,1);
+    }
+    .risma-first-tx-party .risma-party-box{background:linear-gradient(135deg,#be185d,#22c55e)}
+    .risma-manual-bonus-party .risma-party-box{background:linear-gradient(135deg,#16a34a,#f59e0b)}
+    .risma-party-box::before{
+      content:"";position:absolute;inset:-40%;background:radial-gradient(circle,rgba(255,255,255,.42),transparent 58%);
+      animation:rismaPartyGlow 1.7s ease-in-out infinite;
+    }
+    .risma-party-emoji{position:relative;font-size:44px;line-height:1;animation:rismaPartyBounce .78s ease-in-out infinite}
+    .risma-party-title{position:relative;font-size:18px;font-weight:950;letter-spacing:-.03em;margin-top:5px;text-transform:uppercase}
+    .risma-party-sub{position:relative;font-size:16px;font-weight:900;opacity:.96;margin-top:5px;line-height:1.35}
+    .risma-party-amount{position:relative;font-size:27px;font-weight:950;margin-top:8px;font-variant-numeric:tabular-nums}
+    .risma-party-note{position:relative;font-size:15px;font-weight:850;opacity:.96;margin-top:6px;line-height:1.35}
+    .risma-party-close{
+      position:relative;margin-top:12px;min-height:38px;border-radius:14px;padding:8px 16px;
+      background:rgba(255,255,255,.92);color:#166534;border:1px solid rgba(255,255,255,.75);
+      font-weight:950;box-shadow:0 10px 22px rgba(15,23,42,.16);
+    }
+    .risma-party-close:active{transform:scale(.97)}
+    .risma-party-confetti i{
+      position:absolute;left:50%;top:50%;width:7px;height:12px;border-radius:3px;background:#fff;opacity:0;
+      animation:rismaPartyFly .95s ease-out forwards;animation-delay:var(--d);
+    }
+    .risma-party-confetti i:nth-child(3n){background:#fde047}
+    .risma-party-confetti i:nth-child(3n+1){background:#86efac}
+    .risma-party-confetti i:nth-child(3n+2){background:#fbcfe8}
+    @keyframes rismaPartyPop{from{transform:scale(.72) translateY(18px);opacity:.25}to{transform:scale(1) translateY(0);opacity:1}}
+    @keyframes rismaPartyGlow{0%,100%{transform:translate(-12%,-8%) rotate(0deg)}50%{transform:translate(12%,8%) rotate(18deg)}}
+    @keyframes rismaPartyBounce{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-6px) rotate(4deg)}}
+    @keyframes rismaPartyFly{0%{transform:translate(-50%,-50%) scale(.6) rotate(0deg);opacity:1}100%{transform:translate(var(--x),var(--y)) scale(1) rotate(var(--r));opacity:0}}
+    @media(prefers-reduced-motion:reduce){.risma-party-box,.risma-party-emoji,.risma-party-box::before,.risma-party-confetti i{animation:none}.risma-first-tx-party.show,.risma-manual-bonus-party.show{opacity:1}}
+
   </style>
 </head>
 <body>
@@ -1750,6 +1793,8 @@ const RISMA_USERNAME='risma';
 const RISMA_NAME='Risma';
 const DEFAULT_RISMA_BONUS_RATE=0.015;
 const DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE=100;
+const RISMA_FIRST_TX_PARTY_SEEN='risma_first_tx_party_seen_v1';
+const RISMA_MANUAL_BONUS_SEEN='risma_manual_bonus_seen_v1';
 let rismaBonusSettings={transactionBonusRate:DEFAULT_RISMA_BONUS_RATE,closingBonusPerMinute:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE};
 let rismaFirebaseUnsub=null;
 let rismaMonthFirebaseUnsub=null;
@@ -1939,6 +1984,90 @@ function handleRismaAmountPreview(input){
   $('rismaAmountPreview').innerText=input.value?formatRupiah(getActualAmount(input.value)):'';
 }
 
+function rismaPartyConfettiPieces(count=30){
+  return Array.from({length:count},()=>`<i style="--x:${Math.round(Math.random()*240-120)}px;--y:${Math.round(Math.random()*-180-45)}px;--r:${Math.round(Math.random()*720-360)}deg;--d:${(Math.random()*.18).toFixed(2)}s"></i>`).join('');
+}
+function rismaPartyAmountText(amount){
+  return formatRupiah(Number(amount||0)).replace('Rp\u00a0','Rp ');
+}
+function rismaFirstTxPartyKey(){
+  return `${RISMA_FIRST_TX_PARTY_SEEN}_${RISMA_USERNAME}_${getLocalDateString()}`;
+}
+function isRismaFirstTxPartyDue(){
+  try{if(localStorage.getItem(rismaFirstTxPartyKey())==='1')return false;}catch(e){}
+  return (rismaTodayRows||[]).filter(t=>!isFirebaseRecordDeleted(t)).length===0;
+}
+function markRismaFirstTxPartySeen(){
+  try{localStorage.setItem(rismaFirstTxPartyKey(),'1');}catch(e){}
+}
+function closeRismaFirstTxParty(){
+  const wrap=document.querySelector('.risma-first-tx-party');
+  if(!wrap)return;
+  wrap.classList.remove('show');
+  setTimeout(()=>wrap.remove(),220);
+}
+function showRismaFirstTxParty(amount,note){
+  markRismaFirstTxPartySeen();
+  try{if(navigator.vibrate)navigator.vibrate([70,35,90,35,120]);}catch(e){}
+  document.querySelectorAll('.risma-first-tx-party').forEach(el=>el.remove());
+  const wrap=document.createElement('div');
+  wrap.className='risma-first-tx-party';
+  wrap.innerHTML=`<div class="risma-party-confetti">${rismaPartyConfettiPieces(30)}</div><div class="risma-party-box"><div class="risma-party-emoji">🎉</div><div class="risma-party-title">Transaksi Pertama Hari Ini!</div><div class="risma-party-sub">الحمد لله</div><div class="risma-party-amount">${rismaPartyAmountText(amount)}</div><div class="risma-party-note">${escapeHtml(note||'Penjualan')}</div><button class="risma-party-close" onclick="closeRismaFirstTxParty()" type="button">Tutup</button></div>`;
+  (document.querySelector('.app')||document.body).appendChild(wrap);
+  requestAnimationFrame(()=>wrap.classList.add('show'));
+}
+function rismaManualBonusSeenKey(){
+  return `${RISMA_MANUAL_BONUS_SEEN}_${RISMA_USERNAME}`;
+}
+function getRismaManualBonusSeen(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(rismaManualBonusSeenKey())||'[]');
+    return new Set(Array.isArray(raw)?raw.map(String):[]);
+  }catch(e){return new Set();}
+}
+function saveRismaManualBonusSeen(set){
+  try{localStorage.setItem(rismaManualBonusSeenKey(),JSON.stringify([...set].slice(-700)));}catch(e){}
+}
+function getRismaManualBonusId(b){
+  return String(b?.id||b?._docId||`${normalizeRismaUsername(b?.user||b?.username||b?.kasir)}_${getRismaManualBonusMonth(b)}_${Number(b?.amount||0)}_${getRismaRecordTime(b)||Number(b?.createdAtMs||b?.updatedAtMs||0)||''}`);
+}
+function getUnreadRismaManualBonuses(){
+  const month=getLocalDateString().slice(0,7);
+  const seen=getRismaManualBonusSeen();
+  return [...(rismaManualBonusRows||[])]
+    .filter(b=>isRismaManualBonus(b)&&getRismaManualBonusMonth(b)===month&&Number(b.amount||0)>0&&!seen.has(getRismaManualBonusId(b)))
+    .sort((a,b)=>getRismaRecordTime(b)-getRismaRecordTime(a));
+}
+function closeRismaManualBonusParty(){
+  const wrap=document.querySelector('.risma-manual-bonus-party');
+  if(!wrap)return;
+  wrap.classList.remove('show');
+  setTimeout(()=>wrap.remove(),220);
+}
+function showRismaManualBonusParty(amount,note){
+  try{if(navigator.vibrate)navigator.vibrate([80,40,80]);}catch(e){}
+  document.querySelectorAll('.risma-manual-bonus-party').forEach(el=>el.remove());
+  const wrap=document.createElement('div');
+  wrap.className='risma-manual-bonus-party';
+  wrap.innerHTML=`<div class="risma-party-confetti">${rismaPartyConfettiPieces(30)}</div><div class="risma-party-box"><div class="risma-party-emoji">🎁</div><div class="risma-party-title">BONUS DARI MIMIN</div><div class="risma-party-sub">الحمد لله</div><div class="risma-party-amount">${rismaPartyAmountText(amount)}</div><div class="risma-party-note">${escapeHtml(note||'Bonus dari Mimin')}</div><button class="risma-party-close" onclick="closeRismaManualBonusParty()" type="button">Tutup</button></div>`;
+  (document.querySelector('.app')||document.body).appendChild(wrap);
+  requestAnimationFrame(()=>wrap.classList.add('show'));
+}
+function notifyRismaManualBonusParty(){
+  const rows=getUnreadRismaManualBonuses();
+  if(!rows.length)return;
+  const seen=getRismaManualBonusSeen();
+  rows.forEach(b=>seen.add(getRismaManualBonusId(b)));
+  saveRismaManualBonusSeen(seen);
+  const total=rows.reduce((sum,b)=>sum+Number(b.amount||0),0);
+  const latest=rows[0]||{};
+  const note=latest.note||latest.description||latest.keterangan||latest.reason||'Bonus dari Mimin';
+  playRismaSuccessSound();
+  showToast(`Bonus dari Mimin ${rismaPartyAmountText(total)}`);
+  showRismaManualBonusParty(total,note);
+}
+
+
 function initRismaPage(){
   const badge=$('rismaDateBadge');
   if(badge){
@@ -2074,6 +2203,7 @@ function startRismaManualBonusWatch(){
     rismaManualBonusUnsub=q.onSnapshot(snap=>{
       rismaManualBonusRows=snap.docs.map(d=>({_docId:d.id,id:d.id,...(d.data()||{})})).filter(isRismaManualBonus);
       renderRismaMonthBonus();
+      notifyRismaManualBonusParty();
     },err=>{
       console.warn('Watch manual bonus Risma gagal, pakai fallback:',err);
       firebaseDb.collection('manualBonuses').get().then(snap=>{
@@ -2081,6 +2211,7 @@ function startRismaManualBonusWatch(){
           .map(d=>({_docId:d.id,id:d.id,...(d.data()||{})}))
           .filter(b=>isRismaManualBonus(b)&&getRismaManualBonusMonth(b)===month);
         renderRismaMonthBonus();
+        notifyRismaManualBonusParty();
       }).catch(e=>console.warn('Fallback manual bonus Risma gagal:',e));
     });
   }catch(e){
@@ -2243,6 +2374,7 @@ async function addRismaTransaction(){
 
   const btn=$('rismaSaveBtn');
   if(btn){btn.disabled=true;btn.innerText='Menyimpan...';}
+  const firstTxToday=isRismaFirstTxPartyDue();
 
   try{
     const latest=await fetchLatestRismaBonusBeforeSave();
@@ -2280,6 +2412,7 @@ async function addRismaTransaction(){
     $('rismaDesc').value='';
     $('rismaAmountPreview').innerText='';
     playRismaSuccessSound();
+    if(firstTxToday)showRismaFirstTxParty(amount,desc);
     showToast('✅ Penjualan Risma tersimpan!');
   }catch(e){
     showToast('Gagal simpan: '+e.message);
@@ -2329,6 +2462,9 @@ async function deleteRismaTransaction(docId){
     showToast('Gagal hapus: '+e.message);
   }
 }
+
+window.closeRismaFirstTxParty=closeRismaFirstTxParty;
+window.closeRismaManualBonusParty=closeRismaManualBonusParty;
 
 async function initApp(){try{if(!initSupabase())return;
   // Tampilkan loading saat fetch Supabase
