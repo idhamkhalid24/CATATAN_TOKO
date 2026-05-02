@@ -221,6 +221,22 @@
     @media(max-width:440px){.risma-fab{right:16px!important}}
     @media(max-width:360px){.risma-fab{right:14px!important;bottom:92px!important}}
 
+
+    /* === CATATAN HOME STAFF & HARIAN DI HALAMAN RISMA === */
+    .risma-staff-note-card{
+      background:linear-gradient(135deg,#ecfdf5,#fff7fb)!important;
+      border-color:#bbf7d0!important;
+      margin-bottom:10px!important;
+      overflow:hidden;
+    }
+    .risma-staff-note-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:9px}
+    .risma-staff-note-title{font-size:12px;font-weight:950;color:#047857;text-transform:uppercase;letter-spacing:.45px;margin-bottom:3px}
+    .risma-staff-note-meta{font-size:10.5px;color:#64748b;font-weight:800;line-height:1.35}
+    .risma-staff-note-badge{font-size:9.5px;background:#dcfce7;color:#047857;border:1px solid #bbf7d0;border-radius:999px;padding:4px 8px;font-weight:950;white-space:nowrap}
+    .risma-staff-note-text{border:1px solid rgba(4,120,87,.16);background:rgba(220,252,231,.55);border-radius:15px;padding:11px 12px;font-size:12.5px;line-height:1.5;font-weight:850;color:#172015;white-space:pre-wrap;word-break:break-word}
+    .risma-staff-note-foot{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:8px;font-size:10px;color:#64748b;font-weight:800}
+    @media(max-width:360px){.risma-staff-note-text{font-size:12px;padding:10px}.risma-staff-note-head{gap:8px}}
+
   </style>
 </head>
 <body>
@@ -519,6 +535,19 @@
         </div>
       </div>
 
+
+      <!-- Penting dari Admin -->
+      <div id="rismaStaffDailyHomeNoteCard" class="card risma-staff-note-card" style="display:none">
+        <div class="risma-staff-note-head">
+          <div style="min-width:0;flex:1">
+            <div class="risma-staff-note-title">📣 Penting</div>
+            <div id="rismaStaffDailyHomeNoteMeta" class="risma-staff-note-meta">Menunggu update admin...</div>
+          </div>
+          <span id="rismaStaffDailyHomeNoteBadge" class="risma-staff-note-badge">LIVE</span>
+        </div>
+        <div id="rismaStaffDailyHomeNoteText" class="risma-staff-note-text">Memuat catatan...</div>
+      </div>
+
       <!-- Total hari ini -->
       <div style="background:linear-gradient(135deg,#be185d,#9d174d);border-radius:18px;padding:14px;margin-bottom:10px;color:white;box-shadow:0 6px 18px rgba(190,24,93,.25)">
         <div style="font-size:11px;opacity:.8;font-weight:900;text-transform:uppercase;letter-spacing:.5px">Total Penjualan Risma Hari Ini</div>
@@ -623,6 +652,8 @@ const FIREBASE_CONFIG={
   messagingSenderId:"861954349314",
   appId:"1:861954349314:web:bb8384825daedb8d34ca1b"
 };
+const STAFF_DAILY_NOTE_DOC_ID='__staff_daily_home_note';
+const DEFAULT_STAFF_DAILY_NOTE='Semangat bekerja hari ini. Pastikan transaksi dicatat dengan benar dan refresh jika data belum masuk.';
 function getSavedPage(){try{const p=localStorage.getItem(PAGE_KEY);return RESTORABLE_PAGES.includes(p)?p:'home'}catch(e){return 'home'}}
 let supabaseClient=null,transactions=[],zakatHistory=[],currentFilter='today',pendingAction=null,currentPage=getSavedPage();
 // === RISMA SUCCESS SOUND ===
@@ -1861,6 +1892,8 @@ let rismaManualBonusRows=[];
 let rismaManualClosingConfig={id:RISMA_USERNAME,enabled:true,allowedUsers:[],allowedNames:{}};
 let rismaManualClosingUnsub=null;
 let rismaUserProfile=null;
+let rismaStaffDailyNoteUnsub=null;
+let rismaStaffDailyHomeNote={id:STAFF_DAILY_NOTE_DOC_ID,note:DEFAULT_STAFF_DAILY_NOTE,enabled:true,updatedAtMs:0,updatedBy:'',updatedByName:''};
 
 function normalizeRismaUsername(value){
   return String(value||'').trim().toLowerCase();
@@ -2581,6 +2614,58 @@ function notifyRismaManualBonusParty(){
 }
 
 
+
+function getRismaStaffDailyHomeNoteText(){
+  const note=String(rismaStaffDailyHomeNote?.note||'').trim();
+  return note||DEFAULT_STAFF_DAILY_NOTE;
+}
+function getRismaStaffDailyHomeNoteTimeLabel(ms){
+  const n=Number(ms||0);
+  if(!n)return 'Default aplikasi';
+  try{return new Date(n).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'});}catch(e){return 'Baru diperbarui';}
+}
+function renderRismaStaffDailyHomeNoteCard(){
+  const card=$('rismaStaffDailyHomeNoteCard');
+  if(!card)return;
+  const enabled=rismaStaffDailyHomeNote?.enabled!==false;
+  if(!enabled){card.style.display='none';return;}
+  const note=getRismaStaffDailyHomeNoteText();
+  const updatedBy=String(rismaStaffDailyHomeNote?.updatedByName||rismaStaffDailyHomeNote?.updatedBy||'Admin').trim()||'Admin';
+  const updatedAtMs=Number(rismaStaffDailyHomeNote?.updatedAtMs||0);
+  const timeText=getRismaStaffDailyHomeNoteTimeLabel(updatedAtMs);
+  card.style.display='block';
+  const textEl=$('rismaStaffDailyHomeNoteText');
+  const metaEl=$('rismaStaffDailyHomeNoteMeta');
+  const badgeEl=$('rismaStaffDailyHomeNoteBadge');
+  if(textEl)textEl.textContent=note;
+  if(metaEl)metaEl.textContent=timeText;
+  if(badgeEl)badgeEl.textContent=updatedAtMs?'UPDATE':'DEFAULT';
+}
+function startRismaStaffDailyHomeNoteWatch(){
+  const card=$('rismaStaffDailyHomeNoteCard');
+  if(!firebaseDb){
+    if(card)card.style.display='none';
+    return;
+  }
+  if(rismaStaffDailyNoteUnsub){rismaStaffDailyNoteUnsub();rismaStaffDailyNoteUnsub=null;}
+  try{
+    rismaStaffDailyNoteUnsub=firebaseDb.collection('closings').doc(STAFF_DAILY_NOTE_DOC_ID).onSnapshot(doc=>{
+      if(doc.exists){
+        rismaStaffDailyHomeNote={id:doc.id,note:DEFAULT_STAFF_DAILY_NOTE,enabled:true,updatedAtMs:0,updatedBy:'',updatedByName:'',...(doc.data()||{})};
+      }else{
+        rismaStaffDailyHomeNote={id:STAFF_DAILY_NOTE_DOC_ID,note:DEFAULT_STAFF_DAILY_NOTE,enabled:true,updatedAtMs:0,updatedBy:'',updatedByName:''};
+      }
+      renderRismaStaffDailyHomeNoteCard();
+    },err=>{
+      console.warn('Watch catatan Home Staff & Harian untuk Risma gagal:',err);
+      renderRismaStaffDailyHomeNoteCard();
+    });
+  }catch(e){
+    console.warn('Init watch catatan Home Staff & Harian untuk Risma gagal:',e);
+    renderRismaStaffDailyHomeNoteCard();
+  }
+}
+
 function initRismaPage(){
   const badge=$('rismaDateBadge');
   if(badge){
@@ -2588,6 +2673,8 @@ function initRismaPage(){
     badge.innerText=d.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
   }
   renderRismaManualClosingPanel();
+  renderRismaStaffDailyHomeNoteCard();
+  startRismaStaffDailyHomeNoteWatch();
   startRismaUserWatch();
   startRismaFirebaseWatch();
   startRismaMonthWatch();
@@ -2760,6 +2847,7 @@ function refreshRismaToday(){
   if(rismaClosingUnsub){rismaClosingUnsub();rismaClosingUnsub=null;}
   if(rismaManualBonusUnsub){rismaManualBonusUnsub();rismaManualBonusUnsub=null;}
   if(rismaManualClosingUnsub){rismaManualClosingUnsub();rismaManualClosingUnsub=null;}
+  if(rismaStaffDailyNoteUnsub){rismaStaffDailyNoteUnsub();rismaStaffDailyNoteUnsub=null;}
   if(rismaBonusSettingsUnsub){rismaBonusSettingsUnsub();rismaBonusSettingsUnsub=null;}
   if(rismaUserUnsub){rismaUserUnsub();rismaUserUnsub=null;}
   startRismaUserWatch();
@@ -2767,6 +2855,7 @@ function refreshRismaToday(){
   startRismaMonthWatch();
   startRismaClosingWatch();
   startRismaManualClosingWatch();
+  startRismaStaffDailyHomeNoteWatch();
   startRismaManualBonusWatch();
   startRismaBonusSettingsWatch();
   renderRismaManualClosingPanel();
