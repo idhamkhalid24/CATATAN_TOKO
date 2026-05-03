@@ -385,7 +385,6 @@
       <div id="todayFirebaseIncomeHome" class="hidden"></div>
       <div id="todayIncomeSectionTitle" class="hidden"></div>
 
-      <div class="sens-bar">
       <!-- Ringkasan Laba dengan Filter -->
       <div class="profit-summary-card">
         <div class="ps-head">
@@ -409,19 +408,13 @@
           <div class="ps-box"><span>Limit 20%</span><b id="psLabaBersih" class="num" style="color:#69f0ae">Rp 0</b></div>
         </div>
       </div>
-      </div><!-- /sens-bar ringkasan laba -->
-
-      <div class="sens-bar">
       <div class="grid2">
-        <div class="stat"><span>Laba 20% (Semua)</span><b id="autoProfit" class="blue num">Rp 0</b></div>
+        <div class="stat sens-bar"><span>Laba 20% (Semua)</span><b id="autoProfit" class="blue num">Rp 0</b></div>
         <div class="stat" onclick="showExpenseListTodayModal()" style="cursor:pointer;border-color:#ffd7d0;background:#fff8f6"><span>Pengeluaran Hari Ini</span><b id="spendingLimit" class="red num">Rp 0</b><div style="font-size:9px;color:var(--red);font-weight:900;margin-top:3px">Tap untuk lihat detail</div></div>
       </div>
-      </div><!-- /sens-bar laba 20% -->
 
-      <div class="sens-bar">
-      <div id="operationalCard" class="card safe-card" style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:8px"><b>Sisa Operasional</b><b id="operationalUsed" class="num">Rp 0</b></div><div class="small">Ikut filter Ringkasan Laba · Limit 20%: <span id="operationalTotal">Rp 0</span> · Terpakai: <span id="operationalSpent">Rp 0</span></div><div id="limitWarning" class="small red" style="font-weight:900;margin-top:5px"></div></div>
-      </div><!-- /sens-bar sisa operasional -->
-      <div class="card"><div style="display:flex;justify-content:space-between;align-items:start;gap:8px"><div><div class="section-title" style="margin:0 0 3px">Zakat Mal</div><div id="zakatAmountLarge" class="num gold" style="font-size:23px">Rp 0</div><div id="zakatPaymentStatusText" class="small">Menunggu</div></div><button id="payZakatBtn" class="btn gold" style="width:auto;min-width:92px;padding:10px" onclick="markZakatPaid()">Bayar</button></div><div class="grid2" style="margin-top:10px"><div class="stat"><span>Laba 20% Final s.d H-1</span><b id="totalProfitDisplay" class="num">Rp 0</b></div><div class="stat"><span>Belum Dizakatkan Final</span><b id="unpaidProfitDisplay" class="num">Rp 0</b></div></div><div id="zakatBasisInfo" style="font-size:10px;color:var(--muted);font-weight:800;margin-top:7px;padding-top:7px;border-top:1px solid var(--line)">Zakat = 2.5% × laba 20% dari data final sampai kemarin. Transaksi hari ini masuk hitungan besok setelah Firebase sync/LOCK.</div><div style="display:none"><span id="totalZakatPaidProfit">Rp 0</span></div><div id="zakatHistoryPreview" class="zakat-mini" style="display:none"><div id="zakatHistoryMiniList" class="zakat-mini"></div><button class="tab" onclick="showZakatHistoryModal()">Semua</button></div></div>
+      <div id="operationalCard" class="card safe-card sens-bar" style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:8px"><b>Sisa Operasional</b><b id="operationalUsed" class="num">Rp 0</b></div><div class="small">Ikut filter Ringkasan Laba · Limit 20%: <span id="operationalTotal">Rp 0</span> · Terpakai: <span id="operationalSpent">Rp 0</span></div><div id="limitWarning" class="small red" style="font-weight:900;margin-top:5px"></div></div>
+      <div id="zakatMalCard" class="card sens-bar"><div style="display:flex;justify-content:space-between;align-items:start;gap:8px"><div><div class="section-title" style="margin:0 0 3px">Zakat Mal</div><div id="zakatAmountLarge" class="num gold" style="font-size:23px">Rp 0</div><div id="zakatPaymentStatusText" class="small">Menunggu</div></div><button id="payZakatBtn" class="btn gold" style="width:auto;min-width:92px;padding:10px" onclick="markZakatPaid()">Bayar</button></div><div class="grid2" style="margin-top:10px"><div class="stat"><span>Laba 20% Final s.d H-1</span><b id="totalProfitDisplay" class="num">Rp 0</b></div><div class="stat"><span>Belum Dizakatkan Final</span><b id="unpaidProfitDisplay" class="num">Rp 0</b></div></div><div id="zakatBasisInfo" style="font-size:10px;color:var(--muted);font-weight:800;margin-top:7px;padding-top:7px;border-top:1px solid var(--line)">Zakat = 2.5% × laba 20% dari data final sampai kemarin. Transaksi hari ini masuk hitungan besok setelah Firebase sync/LOCK.</div><div style="display:none"><span id="totalZakatPaidProfit">Rp 0</span></div><div id="zakatHistoryPreview" class="zakat-mini" style="display:none"><div id="zakatHistoryMiniList" class="zakat-mini"></div><button class="tab" onclick="showZakatHistoryModal()">Semua</button></div></div>
       <button class="btn whatsapp" onclick="sendWhatsAppReport()">Laporan WA</button>
       <div id="hiddenModeShortcuts" class="hidden-mode-shortcuts">
         <button class="shortcut-btn ops" onclick="openOpsModal()">Oprasional Toko</button>
