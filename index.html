@@ -2412,7 +2412,8 @@ function openRismaTransactionModal(){
   const preview=$('rismaAmountPreview');
   if(preview)preview.innerText='';
   modal.classList.remove('hidden');
-  setTimeout(()=>amount?.focus(),80);
+  // Saat FAB transaksi Risma dibuka, keyboard masuk ke Nama Barang dulu, bukan Nominal.
+  setTimeout(()=>desc?.focus(),80);
 }
 function closeRismaTransactionModal(){
   const modal=$('rismaTransactionModal');
