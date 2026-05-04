@@ -477,6 +477,36 @@
     }
 
 
+
+    /* === SCROLL PANJANG AMAN ANDROID ===
+       Cegah native pull-to-refresh kepencet saat user scroll data panjang.
+       Refresh tetap bisa lewat tombol Refresh di halaman masing-masing. */
+    html,body{
+      overscroll-behavior-y:contain!important;
+      overscroll-behavior-x:none!important;
+    }
+    .app,.page,.list,.staff-summary-list,#rismaTodayList,.box{
+      overscroll-behavior-y:contain!important;
+      -webkit-overflow-scrolling:touch!important;
+    }
+    .staff-summary-list,#rismaTodayList{
+      overflow-y:auto!important;
+      touch-action:pan-y!important;
+      scrollbar-width:thin;
+    }
+    #pageStaffDaily .staff-summary-list{
+      max-height:calc(100dvh - 285px)!important;
+      min-height:180px!important;
+    }
+    #rismaTodayList{
+      max-height:calc(100dvh - 300px)!important;
+      min-height:190px!important;
+    }
+    @media(max-width:360px){
+      #pageStaffDaily .staff-summary-list{max-height:calc(100dvh - 255px)!important}
+      #rismaTodayList{max-height:calc(100dvh - 275px)!important}
+    }
+
   </style>
 </head>
 <body>
