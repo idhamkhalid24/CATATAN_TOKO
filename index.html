@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="risma-hide-mode">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -221,6 +221,38 @@
     @media(max-width:440px){.risma-fab{right:16px!important}}
     @media(max-width:360px){.risma-fab{right:14px!important;bottom:92px!important}}
 
+
+
+    /* === RINGKASAN STAFF & HARIAN READ ONLY === */
+    #nav-staffDaily.active{background:linear-gradient(135deg,#ede9fe,#f5f3ff)!important;color:#7c3aed!important;box-shadow:inset 0 0 0 1px rgba(124,58,237,.12),0 5px 14px rgba(124,58,237,.12)!important}
+
+
+    /* === HARD HIDE NAV SAAT MODE HIDE AKTIF === */
+    html.risma-hide-mode #nav-history,
+    html.risma-hide-mode #nav-firebase{
+      display:none!important;
+    }
+    html.risma-hide-mode #bottomNav{
+      grid-template-columns:repeat(3,1fr)!important;
+    }
+    .staff-summary-hero{background:linear-gradient(135deg,#4c1d95,#7c3aed);color:white;border-radius:18px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+    .staff-summary-hero .label{opacity:.82;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.5px}
+    .staff-summary-hero .value{font-size:25px;margin:5px 0 3px;font-weight:900;letter-spacing:-.5px}
+    .staff-summary-hero .mini{display:flex;justify-content:space-between;gap:8px;font-size:11px;opacity:.88;line-height:1.35}
+    .staff-summary-card{background:linear-gradient(135deg,#faf5ff,#ffffff);border-color:#ddd6fe}
+    .staff-summary-list{display:flex;flex-direction:column;gap:7px;max-height:52vh;overflow-y:auto}
+    .staff-summary-row{background:white;border:1px solid #e9d5ff;border-radius:15px;padding:10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+    .staff-summary-left{display:flex;align-items:center;gap:9px;min-width:0}
+    .staff-summary-avatar{width:34px;height:34px;border-radius:13px;display:grid;place-items:center;font-weight:950;flex:0 0 34px;background:#ede9fe;color:#7c3aed;border:1px solid #ddd6fe}
+    .staff-summary-name{font-size:13px;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .staff-summary-meta{font-size:10.5px;color:var(--muted);font-weight:800;margin-top:2px;line-height:1.35}
+    .staff-summary-right{text-align:right;white-space:nowrap}
+    .staff-summary-money{font-size:13px;font-weight:950;color:#7c3aed;display:block}
+    .staff-summary-bonus{font-size:11px;font-weight:900;color:#15803d;margin-top:3px;display:block}
+    .staff-summary-role{font-size:9px;border-radius:999px;padding:2px 7px;font-weight:950;border:1px solid #ddd6fe;background:#f5f3ff;color:#7c3aed;margin-top:5px;display:inline-flex}
+    .staff-summary-role.harian{background:#eff6ff;color:#2563eb;border-color:#bfdbfe}
+    .staff-summary-readonly{font-size:10px;border-radius:999px;padding:4px 8px;font-weight:950;background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe;white-space:nowrap}
+    @media(max-width:360px){.staff-summary-row{grid-template-columns:1fr;gap:7px}.staff-summary-right{text-align:left;padding-left:43px}.staff-summary-hero .value{font-size:22px}}
 
     /* === CATATAN HOME STAFF & HARIAN DI HALAMAN RISMA === */
     .risma-staff-note-card{
@@ -594,6 +626,58 @@
       </div>
     </section>
 
+
+    <!-- ===== HALAMAN RINGKASAN STAFF & HARIAN (READ ONLY) ===== -->
+    <section id="pageStaffDaily" class="page">
+      <div class="card staff-summary-card" style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div style="min-width:0">
+            <div class="section-title" style="margin:0 0 3px;color:#7c3aed">👥 Staff & Harian</div>
+            <b style="font-size:15px">Ringkasan Pendapatan Hari Ini</b>
+            <div class="small" style="margin-top:2px;line-height:1.35">Read only · data langsung dari index Firebase</div>
+          </div>
+          <div style="text-align:right">
+            <div id="staffSummaryDateBadge" class="chip" style="background:#f5f3ff;color:#7c3aed;border-color:#ddd6fe;font-size:11px"></div>
+            <div id="staffSummaryStatus" class="small" style="margin-top:5px;font-weight:900;color:#7c3aed">⏳ Memuat...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="staff-summary-hero">
+        <div class="label">Total Pendapatan Staff + Harian Hari Ini</div>
+        <div id="staffSummaryTotalIncome" class="value num">Rp 0</div>
+        <div class="mini">
+          <span><b id="staffSummaryTotalUsers">0</b> user aktif</span>
+          <span><b id="staffSummaryTotalTx">0</b> trx</span>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-bottom:10px">
+        <div class="stat" style="border-color:#ddd6fe;background:#faf5ff;box-shadow:none">
+          <span>Bonus Hari Ini</span>
+          <b id="staffSummaryTotalBonus" class="num" style="color:#15803d;font-size:18px">Rp 0</b>
+        </div>
+        <div class="stat" style="border-color:#ddd6fe;background:white;box-shadow:none">
+          <span>Status Data</span>
+          <b class="num" style="color:#7c3aed;font-size:13px">READ ONLY</b>
+          <div id="staffSummaryUpdated" class="small" style="margin-top:4px">Realtime dari index</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
+          <div>
+            <b style="font-size:13px">📋 Detail per User</b>
+            <div class="small" style="margin-top:2px">Pendapatan hari ini + bonus transaksi/manual/closing hari ini</div>
+          </div>
+          <button class="tab" style="font-size:10px;padding:5px 9px;color:#7c3aed" onclick="refreshStaffDailySummary()">↻ Refresh</button>
+        </div>
+        <div id="staffSummaryList" class="staff-summary-list">
+          <div class="empty">Memuat data staff dan karyawan harian...</div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
 
@@ -624,10 +708,11 @@
 
   <button id="fabBtn" class="fab" onclick="openTransactionModal()" aria-label="Input transaksi">+</button>
   <button id="rismaFabBtn" class="fab risma-fab" onclick="openRismaTransactionModal()" aria-label="Input penjualan Risma">+</button>
-  <nav class="nav" style="grid-template-columns:repeat(4,1fr)">
+  <nav id="bottomNav" class="nav" style="grid-template-columns:repeat(5,1fr)">
     <button id="nav-home" class="active" onclick="goPage('home')">🏠 Home</button>
     <button id="nav-history" onclick="goPage('history')">📋 Riwayat</button>
     <button id="nav-firebase" onclick="goPage('firebase')">🔥 Firebase</button>
+    <button id="nav-staffDaily" onclick="goPage('staffDaily')" style="color:#7c3aed">👥 Staff</button>
     <button id="nav-risma" onclick="goPage('risma')" style="color:#be185d">👩 Risma</button>
   </nav>
 
@@ -636,7 +721,7 @@ const SUPABASE_URL='https://myxrvipyodadnldtomzs.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_aG-kyasJNCEk2U9fN5T4qg_GfY0FpPH';
 const OWNER_ID='rocky-hijab'; const APP_PIN='170845';
 const PAGE_KEY='risma_finance_last_page_v1';
-const RESTORABLE_PAGES=['home','history','firebase','risma'];
+const RESTORABLE_PAGES=['home','history','firebase','risma','staffDaily'];
 const FIREBASE_CONFIG={
   apiKey:"AIzaSyAqmTEKnLKOXcmOoR9RrXksNe5_Fix42w8",
   authDomain:"rocky-fd14b.firebaseapp.com",
@@ -722,6 +807,7 @@ function toggleSensitiveData(){
 
 function doReveal(){
   sensitiveHidden=false;
+  document.documentElement.classList.remove('risma-hide-mode');
   const wrap=document.querySelector('.sensitive-wrap');
   const histWrap=document.querySelector('.sensitive-wrap-history');
   const fab=$('fabBtn');
@@ -729,12 +815,14 @@ function doReveal(){
   wrap&&wrap.classList.remove('sensitive-hidden');
   histWrap&&histWrap.classList.remove('sensitive-hidden');
   if(fab)fab.style.display='grid';
+  updateBottomNavForHideMode();
   updateRismaFabVisibility();
   icon.innerHTML='<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
 }
 
 function doHide(){
   sensitiveHidden=true;
+  document.documentElement.classList.add('risma-hide-mode');
   const wrap=document.querySelector('.sensitive-wrap');
   const histWrap=document.querySelector('.sensitive-wrap-history');
   const fab=$('fabBtn');
@@ -742,6 +830,9 @@ function doHide(){
   wrap&&wrap.classList.add('sensitive-hidden');
   histWrap&&histWrap.classList.add('sensitive-hidden');
   if(fab)fab.style.display='none';
+  document.documentElement.classList.add('risma-hide-mode');
+  if(HIDE_MODE_NAV_PAGES.includes(currentPage))goPage('home');
+  updateBottomNavForHideMode();
   updateRismaFabVisibility();
   icon.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
 }
@@ -796,13 +887,57 @@ window.addEventListener('load',function(){
   if(histWrap)histWrap.classList.add('sensitive-hidden');
   const fab=$('fabBtn');
   if(fab)fab.style.display='none';
+  if(HIDE_MODE_NAV_PAGES.includes(currentPage))goPage('home');
+  updateBottomNavForHideMode();
   updateRismaFabVisibility();
 });
 let firebaseDb=null,firebaseUnsub=null,todayFirebaseUnsub=null,firebaseUploadDate='',firebaseIncomeRows=[],firebaseIncomeTotal=0,todayFirebaseIncomeRows=[],todayFirebaseIncomeTotal=0,pendingFirebaseUploads=[],monthValidityBusy=false;
 function $(id){return document.getElementById(id)}
 function isSupabaseConfigured(){return SUPABASE_URL&&SUPABASE_ANON_KEY&&!SUPABASE_URL.includes('ISI_')&&!SUPABASE_ANON_KEY.includes('ISI_')}
 function initSupabase(){if(!isSupabaseConfigured()){showToast('Supabase belum disetting');return false}supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);return true}
-function goPage(p){if(!RESTORABLE_PAGES.includes(p))p='home';currentPage=p;try{localStorage.setItem(PAGE_KEY,p)}catch(e){};['home','history','firebase','risma'].forEach(x=>{ const pg=$('page'+x[0].toUpperCase()+x.slice(1)); if(pg)pg.classList.toggle('active',x===p); const nav=$('nav-'+x); if(nav)nav.classList.toggle('active',x===p)}); updateRismaFabVisibility(); render(); if(p==='firebase')renderFirebaseUploadCard(); if(p==='risma')initRismaPage();}
+const HIDE_MODE_NAV_PAGES=['history','firebase'];
+const NORMAL_BOTTOM_NAV_ORDER=['home','history','firebase','staffDaily','risma'];
+const HIDE_BOTTOM_NAV_ORDER=['home','staffDaily','risma','history','firebase'];
+function isHiddenModeBlockedPage(p){return sensitiveHidden && HIDE_MODE_NAV_PAGES.includes(p)}
+function updateBottomNavForHideMode(){
+  const bottomNav=$('bottomNav');
+  document.documentElement.classList.toggle('risma-hide-mode', !!sensitiveHidden);
+  const orderedPages=sensitiveHidden?HIDE_BOTTOM_NAV_ORDER:NORMAL_BOTTOM_NAV_ORDER;
+  let visibleCount=0;
+  orderedPages.forEach((page,idx)=>{
+    const nav=$('nav-'+page);
+    if(!nav)return;
+    const blocked=sensitiveHidden && HIDE_MODE_NAV_PAGES.includes(page);
+    if(blocked){
+      nav.style.setProperty('display','none','important');
+      nav.setAttribute('aria-hidden','true');
+    }else{
+      nav.style.removeProperty('display');
+      nav.removeAttribute('aria-hidden');
+    }
+    nav.style.order=String(idx);
+    if(!blocked)visibleCount++;
+  });
+  if(bottomNav)bottomNav.style.setProperty('grid-template-columns',`repeat(${visibleCount||1},1fr)`,'important');
+}
+function goPage(p){
+  if(!RESTORABLE_PAGES.includes(p))p='home';
+  if(isHiddenModeBlockedPage(p))p='home';
+  currentPage=p;
+  try{localStorage.setItem(PAGE_KEY,p)}catch(e){};
+  ['home','history','firebase','risma','staffDaily'].forEach(x=>{
+    const pg=$('page'+x[0].toUpperCase()+x.slice(1));
+    if(pg)pg.classList.toggle('active',x===p);
+    const nav=$('nav-'+x);
+    if(nav)nav.classList.toggle('active',x===p);
+  });
+  updateBottomNavForHideMode();
+  updateRismaFabVisibility();
+  render();
+  if(p==='firebase')renderFirebaseUploadCard();
+  if(p==='risma')initRismaPage();
+  if(p==='staffDaily')initStaffDailySummaryPage();
+}
 function openTransactionModal(){$('inputDate').value=getLocalDateString();$('transactionModal').classList.remove('hidden');setTimeout(()=>$('amount').focus(),80)}
 function closeTransactionModal(){$('transactionModal').classList.add('hidden')}
 const ZAKAT_LOCAL_BACKUP_KEY='risma_zakat_history_backup_v2';
@@ -2015,6 +2150,12 @@ let rismaManualClosingUnsub=null;
 let rismaUserProfile=null;
 let rismaStaffDailyNoteUnsub=null;
 let rismaStaffDailyHomeNote={id:STAFF_DAILY_NOTE_DOC_ID,note:DEFAULT_STAFF_DAILY_NOTE,enabled:true,updatedAtMs:0,updatedBy:'',updatedByName:''};
+let staffDailySummaryUnsubs=[];
+let staffDailyUsers=[];
+let staffDailyTxRows=[];
+let staffDailyManualRows=[];
+let staffDailyClosingRows=[];
+let staffDailySummaryLoaded={users:false,tx:false,manual:false,closing:false};
 
 function normalizeRismaUsername(value){
   return String(value||'').trim().toLowerCase();
@@ -2256,8 +2397,9 @@ function updateRismaFabVisibility(){
   const rismaFab=$('rismaFabBtn');
   const mainFab=$('fabBtn');
   const showRismaFab=currentPage==='risma' && sensitiveHidden;
+  const hideMainFab=sensitiveHidden || currentPage==='staffDaily';
   if(rismaFab)rismaFab.style.display=showRismaFab?'grid':'none';
-  if(mainFab)mainFab.style.display=sensitiveHidden?'none':'grid';
+  if(mainFab)mainFab.style.display=hideMainFab?'none':'grid';
 }
 function openRismaTransactionModal(){
   if(currentPage!=='risma')goPage('risma');
@@ -2789,6 +2931,246 @@ function startRismaStaffDailyHomeNoteWatch(){
   }
 }
 
+
+// =====================================================
+// RINGKASAN STAFF & HARIAN — READ ONLY DARI INDEX
+// =====================================================
+function clearStaffDailySummaryWatch(){
+  (staffDailySummaryUnsubs||[]).forEach(unsub=>{try{if(typeof unsub==='function')unsub();}catch(e){}});
+  staffDailySummaryUnsubs=[];
+}
+function getStaffDailyRole(profile={}){
+  return normalizeRismaRole(profile?.role||profile?.userRole||profile?.bonusGroup||'staff');
+}
+function isStaffDailySummaryProfile(profile={}){
+  if(!profile)return false;
+  const username=normalizeRismaUsername(profile.username||profile.user||profile.id||profile._docId);
+  const role=getStaffDailyRole(profile);
+  if(!username||['admin','owner','rocky-hijab'].includes(username)||profile.isAdmin===true)return false;
+  if(role==='admin')return false;
+  if(role!=='staff'&&role!=='harian')return false;
+  if(profile.active===false||profile.active==='false')return false;
+  if(isFirebaseRecordDeleted(profile))return false;
+  return true;
+}
+function getStaffDailyUserKeyFromRecord(record={}){
+  return normalizeRismaUsername(record.user||record.username||record.createdBy||record.kasir||record._docId||record.id);
+}
+function staffDailyProfileFromRecord(record={}){
+  const u=getStaffDailyUserKeyFromRecord(record);
+  if(!u)return null;
+  const role=getStaffDailyRole(record);
+  if(role==='admin')return null;
+  return {
+    username:u,
+    _docId:u,
+    name:record.name||record.userName||record.createdByName||record.kasirName||u,
+    role:role==='harian'?'harian':'staff',
+    transactionBonusRate:record.transactionBonusRate,
+    transactionBonusPercent:record.transactionBonusPercent,
+    dailyBonusRate:record.dailyBonusRate,
+    dailyBonusPercent:record.dailyBonusPercent,
+    closingBonusPerMinute:record.closingBonusPerMinute||record.closingBonusPerMinuteSnapshot,
+    active:true
+  };
+}
+function getStaffManualBonusDate(b){
+  const raw=String(b?.dateKey||b?.bonusDate||b?.date||'').slice(0,10);
+  if(/^\d{4}-\d{2}-\d{2}$/.test(raw))return raw;
+  const n=getRismaRecordTime(b);
+  return n?getLocalDateString(new Date(n)):getLocalDateString();
+}
+function getStaffDailyTxBonusRate(t,profile){
+  if(t){
+    if(hasRismaBonusValue(t.bonusRate)){const rate=Number(t.bonusRate);if(Number.isFinite(rate)&&rate>=0)return rate;}
+    if(hasRismaBonusValue(t.transactionBonusRate)){const rate=Number(t.transactionBonusRate);if(Number.isFinite(rate)&&rate>=0)return rate;}
+    if(hasRismaBonusValue(t.bonusPercent)){const percent=Number(t.bonusPercent);if(Number.isFinite(percent)&&percent>=0)return percent/100;}
+    if(hasRismaBonusValue(t.transactionBonusPercent)){const percent=Number(t.transactionBonusPercent);if(Number.isFinite(percent)&&percent>=0)return percent/100;}
+  }
+  return getRismaTransactionBonusRate(profile);
+}
+function getStaffDailyClosingBonus(username,profile){
+  if(getStaffDailyRole(profile)==='harian')return 0;
+  const u=normalizeRismaUsername(username);
+  if(!u)return 0;
+  const today=getLocalDateString();
+  const rows=(staffDailyClosingRows||[]).filter(c=>c&&(c.closed===true||c.closed==='true')&&!isFirebaseRecordDeleted(c)&&!(c.canceled===true||c.canceled==='true')&&String(c.dateKey||'').slice(0,10)===today&&!isRismaClosingCanceledForUser(c,u));
+  let userScoped=0, globalScoped=0;
+  rows.forEach(c=>{
+    const byUser=c.bonusByUser||{};
+    if(Object.prototype.hasOwnProperty.call(byUser,u)){
+      const val=Number(byUser[u]||0);
+      if(Number.isFinite(val)&&val>0){
+        const scope=normalizeRismaUsername(c.scope||'');
+        const cu=normalizeRismaUsername(c.user||c.username||'');
+        if(scope==='user'||cu===u)userScoped=Math.max(userScoped,val);
+        else globalScoped=Math.max(globalScoped,val);
+      }
+      return;
+    }
+    const scope=normalizeRismaUsername(c.scope||'');
+    const cu=normalizeRismaUsername(c.user||c.username||'');
+    if((scope==='user'||cu) && cu===u){
+      const val=Number(c.bonusPerUser||c.totalBonus||0);
+      if(Number.isFinite(val)&&val>0)userScoped=Math.max(userScoped,val);
+    }
+  });
+  return Math.round(userScoped||globalScoped||0);
+}
+function buildStaffDailySummaryRows(){
+  const today=getLocalDateString();
+  const users=new Map();
+  (staffDailyUsers||[]).forEach(profile=>{
+    const raw={...(profile||{})};
+    raw.username=raw.username||raw.user||raw.id||raw._docId;
+    raw.role=getStaffDailyRole(raw);
+    if(!isStaffDailySummaryProfile(raw))return;
+    const u=normalizeRismaUsername(raw.username||raw.id||raw._docId);
+    users.set(u,{username:u,name:String(raw.name||raw.fullName||u).trim()||u,role:raw.role,profile:raw,income:0,txCount:0,txBonus:0,manualBonus:0,closingBonus:0,bonus:0});
+  });
+  const ensureUser=(record)=>{
+    const u=getStaffDailyUserKeyFromRecord(record);
+    if(!u)return null;
+    if(!users.has(u)){
+      const stub=staffDailyProfileFromRecord(record);
+      if(!stub)return null;
+      users.set(u,{username:u,name:String(stub.name||u).trim()||u,role:stub.role,profile:stub,income:0,txCount:0,txBonus:0,manualBonus:0,closingBonus:0,bonus:0});
+    }
+    return users.get(u);
+  };
+  (staffDailyTxRows||[]).forEach(t=>{
+    if(!t||isFirebaseRecordDeleted(t))return;
+    const date=String(t.dateKey||getFirebaseRecordDateKey(t)||'').slice(0,10);
+    if(date!==today)return;
+    const row=ensureUser(t);
+    if(!row)return;
+    const amount=Number(t.amount||0);
+    if(!Number.isFinite(amount)||amount===0)return;
+    row.income+=amount;
+    row.txCount+=1;
+    row.txBonus+=Math.round(amount*getStaffDailyTxBonusRate(t,row.profile));
+  });
+  (staffDailyManualRows||[]).forEach(b=>{
+    if(!b||isFirebaseRecordDeleted(b))return;
+    if(getStaffManualBonusDate(b)!==today)return;
+    const amount=Number(b.amount||0);
+    if(!Number.isFinite(amount)||amount===0)return;
+    const row=ensureUser(b);
+    if(!row)return;
+    row.manualBonus+=amount;
+  });
+  users.forEach(row=>{
+    row.closingBonus=getStaffDailyClosingBonus(row.username,row.profile);
+    row.bonus=Math.round(Number(row.txBonus||0)+Number(row.manualBonus||0)+Number(row.closingBonus||0));
+  });
+  return [...users.values()].sort((a,b)=>(b.income+b.bonus)-(a.income+a.bonus)||b.income-a.income||String(a.name).localeCompare(String(b.name),'id'));
+}
+function renderStaffDailySummary(){
+  const badge=$('staffSummaryDateBadge');
+  if(badge){
+    const d=new Date();
+    badge.innerText=d.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  }
+  const rows=buildStaffDailySummaryRows();
+  const totalIncome=rows.reduce((sum,r)=>sum+Number(r.income||0),0);
+  const totalBonus=rows.reduce((sum,r)=>sum+Number(r.bonus||0),0);
+  const totalTx=rows.reduce((sum,r)=>sum+Number(r.txCount||0),0);
+  if($('staffSummaryTotalIncome'))$('staffSummaryTotalIncome').innerText=formatRupiah(totalIncome);
+  if($('staffSummaryTotalBonus'))$('staffSummaryTotalBonus').innerText=formatRupiah(totalBonus);
+  if($('staffSummaryTotalUsers'))$('staffSummaryTotalUsers').innerText=rows.length;
+  if($('staffSummaryTotalTx'))$('staffSummaryTotalTx').innerText=totalTx;
+  const loaded=staffDailySummaryLoaded.users||staffDailySummaryLoaded.tx||staffDailySummaryLoaded.manual||staffDailySummaryLoaded.closing;
+  if($('staffSummaryStatus'))$('staffSummaryStatus').innerText=firebaseDb?(loaded?'✅ Live':'⏳ Memuat...'):'❌ Firebase mati';
+  if($('staffSummaryUpdated'))$('staffSummaryUpdated').innerText=loaded?`Update ${new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Jakarta'}).replace('.',':')}`:'Menunggu data index';
+  const list=$('staffSummaryList');
+  if(!list)return;
+  if(!rows.length){
+    list.innerHTML='<div class="empty">Belum ada data staff/harian dari index hari ini</div>';
+    return;
+  }
+  list.innerHTML=rows.map(row=>{
+    const role=row.role==='harian'?'Karyawan Harian':'Staff';
+    const avatar=row.role==='harian'?'H':'S';
+    const pieces=[];
+    if(row.txBonus)pieces.push(`trx ${formatRupiah(row.txBonus)}`);
+    if(row.manualBonus)pieces.push(`manual ${formatRupiah(row.manualBonus)}`);
+    if(row.closingBonus)pieces.push(`closing ${formatRupiah(row.closingBonus)}`);
+    const bonusDetail=pieces.length?pieces.join(' · '):'belum ada bonus';
+    return `<div class="staff-summary-row">
+      <div class="staff-summary-left">
+        <div class="staff-summary-avatar">${avatar}</div>
+        <div style="min-width:0;flex:1">
+          <div class="staff-summary-name">${escapeHtml(row.name||row.username)}</div>
+          <div class="staff-summary-meta">${row.txCount} transaksi · ${bonusDetail}</div>
+          <span class="staff-summary-role ${row.role==='harian'?'harian':''}">${role}</span>
+        </div>
+      </div>
+      <div class="staff-summary-right">
+        <span class="staff-summary-money">${formatRupiah(row.income)}</span>
+        <span class="staff-summary-bonus">Bonus ${formatRupiah(row.bonus)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+function startStaffDailySummaryWatch(){
+  if(!firebaseDb){renderStaffDailySummary();return;}
+  clearStaffDailySummaryWatch();
+  staffDailySummaryLoaded={users:false,tx:false,manual:false,closing:false};
+  const today=getLocalDateString();
+  const month=today.slice(0,7);
+  const watch=(query,assign,label,fallback)=>{
+    try{
+      const unsub=query.onSnapshot(snap=>{
+        assign(snap.docs.map(d=>({_docId:d.id,id:d.id,...(d.data()||{})})));
+        staffDailySummaryLoaded[label]=true;
+        renderStaffDailySummary();
+      },err=>{
+        console.warn('Watch ringkasan staff gagal:',label,err);
+        if(typeof fallback==='function')fallback();
+      });
+      staffDailySummaryUnsubs.push(unsub);
+    }catch(e){
+      console.warn('Init watch ringkasan staff gagal:',label,e);
+      if(typeof fallback==='function')fallback();
+    }
+  };
+  watch(firebaseDb.collection('users'),rows=>{staffDailyUsers=rows;},'users',()=>{
+    staffDailyUsers=[];
+    staffDailySummaryLoaded.users=true;
+    renderStaffDailySummary();
+  });
+  watch(firebaseDb.collection('transactions').where('dateKey','==',today),rows=>{staffDailyTxRows=normalizeFirebaseRows(rows);},'tx',()=>{
+    firebaseDb.collection('transactions').where('createdAtMs','>=',wibDayStartMs(today)).where('createdAtMs','<=',wibDayEndMs(today)).get().then(snap=>{
+      staffDailyTxRows=normalizeFirebaseRows(snap.docs.map(d=>({_docId:d.id,id:d.id,...(d.data()||{})})));
+      staffDailySummaryLoaded.tx=true;
+      renderStaffDailySummary();
+    }).catch(e=>{console.warn('Fallback transaksi ringkasan staff gagal:',e);staffDailySummaryLoaded.tx=true;renderStaffDailySummary();});
+  });
+  watch(firebaseDb.collection('manualBonuses').where('monthKey','==',month),rows=>{staffDailyManualRows=rows.filter(b=>getStaffManualBonusDate(b)===today&&!isFirebaseRecordDeleted(b));},'manual',()=>{
+    firebaseDb.collection('manualBonuses').where('dateKey','==',today).get().then(snap=>{
+      staffDailyManualRows=snap.docs.map(d=>({_docId:d.id,id:d.id,...(d.data()||{})})).filter(b=>getStaffManualBonusDate(b)===today&&!isFirebaseRecordDeleted(b));
+      staffDailySummaryLoaded.manual=true;
+      renderStaffDailySummary();
+    }).catch(e=>{console.warn('Fallback manual bonus ringkasan staff gagal:',e);staffDailySummaryLoaded.manual=true;renderStaffDailySummary();});
+  });
+  watch(firebaseDb.collection('closings').where('dateKey','==',today),rows=>{staffDailyClosingRows=rows.filter(c=>c._docId!=='__bonus_settings'&&c.type!=='bonus_settings');},'closing',()=>{
+    staffDailyClosingRows=[];
+    staffDailySummaryLoaded.closing=true;
+    renderStaffDailySummary();
+  });
+}
+function initStaffDailySummaryPage(){
+  renderStaffDailySummary();
+  startRismaBonusSettingsWatch();
+  startStaffDailySummaryWatch();
+}
+function refreshStaffDailySummary(){
+  clearStaffDailySummaryWatch();
+  startRismaBonusSettingsWatch();
+  startStaffDailySummaryWatch();
+  showToast('Ringkasan staff direfresh');
+}
+
 function initRismaPage(){
   const badge=$('rismaDateBadge');
   if(badge){
@@ -2913,6 +3295,7 @@ function startRismaBonusSettingsWatch(){
       rismaBonusSettings={transactionBonusRate:DEFAULT_RISMA_BONUS_RATE,closingBonusPerMinute:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE};
     }
     renderRismaMonthBonus();
+    renderStaffDailySummary();
   },err=>console.warn('Watch kontrol bonus Risma gagal:',err));
 }
 
