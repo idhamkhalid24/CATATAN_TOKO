@@ -3333,11 +3333,12 @@ const RISMA_USERNAME='risma';
 const RISMA_NAME='Risma';
 const DEFAULT_RISMA_BONUS_RATE=0.015;
 const DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE=100;
-const RISMA_CLOSING_DEADLINE_HOUR=18;
-const RISMA_CLOSING_DEADLINE_MINUTE=0;
+const DEFAULT_RISMA_CLOSING_DEADLINE_HOUR=18;
+const DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE=0;
+const DEFAULT_RISMA_CLOSING_DEADLINE_TIME='18:00';
 const RISMA_FIRST_TX_PARTY_SEEN='risma_first_tx_party_seen_v1';
 const RISMA_MANUAL_BONUS_SEEN='risma_manual_bonus_seen_v1';
-let rismaBonusSettings={transactionBonusRate:DEFAULT_RISMA_BONUS_RATE,closingBonusPerMinute:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE};
+let rismaBonusSettings={transactionBonusRate:DEFAULT_RISMA_BONUS_RATE,transactionBonusPercent:1.5,closingBonusPerMinute:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE,closingDeadlineTime:DEFAULT_RISMA_CLOSING_DEADLINE_TIME,closingDeadlineHour:DEFAULT_RISMA_CLOSING_DEADLINE_HOUR,closingDeadlineMinute:DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE,closingDeadlineMinutes:(DEFAULT_RISMA_CLOSING_DEADLINE_HOUR*60)+DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE};
 let rismaFirebaseUnsub=null;
 let rismaMonthFirebaseUnsub=null;
 let rismaClosingUnsub=null;
@@ -3371,6 +3372,14 @@ function getRismaDisplayName(){
   return String(rismaUserProfile?.name||RISMA_NAME||RISMA_USERNAME).trim()||RISMA_NAME;
 }
 
+
+function getDefaultRismaBonusSettings(){return{transactionBonusRate:DEFAULT_RISMA_BONUS_RATE,transactionBonusPercent:Number((DEFAULT_RISMA_BONUS_RATE*100).toFixed(3)),closingBonusPerMinute:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE,closingDeadlineTime:DEFAULT_RISMA_CLOSING_DEADLINE_TIME,closingDeadlineHour:DEFAULT_RISMA_CLOSING_DEADLINE_HOUR,closingDeadlineMinute:DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE,closingDeadlineMinutes:(DEFAULT_RISMA_CLOSING_DEADLINE_HOUR*60)+DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE};}
+function normalizeRismaClosingDeadlineParts(value=null,fallback=null){const fb=fallback||{hour:DEFAULT_RISMA_CLOSING_DEADLINE_HOUR,minute:DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE};if(value&&typeof value==='object'){const direct=value.deadlineTime??value.closingDeadlineTime??value.deadline??value.jamClosing??value.jam_closing??value.label??null;if(direct!==null&&direct!==undefined&&String(direct).trim()!=='')return normalizeRismaClosingDeadlineParts(direct,fb);const h=Number(value.deadlineHour??value.closingDeadlineHour??value.hour),m=Number(value.deadlineMinute??value.closingDeadlineMinute??value.minute);if(Number.isInteger(h)&&Number.isInteger(m)&&h>=0&&h<=23&&m>=0&&m<=59)return{hour:h,minute:m};const total=Number(value.deadlineMinutes??value.closingDeadlineMinutes??NaN);if(Number.isFinite(total)&&total>=0)return{hour:Math.floor(total/60)%24,minute:Math.floor(total%60)};return fb;}const raw=String(value??'').trim().replace('.',':').replace(/\s*WIB$/i,'');const match=raw.match(/^(\d{1,2}):(\d{2})/);if(match){const h=Number(match[1]),m=Number(match[2]);if(Number.isInteger(h)&&Number.isInteger(m)&&h>=0&&h<=23&&m>=0&&m<=59)return{hour:h,minute:m};}return fb;}
+function getRismaClosingDeadlineParts(source=null){if(source&&typeof source==='object')return normalizeRismaClosingDeadlineParts(source,{hour:DEFAULT_RISMA_CLOSING_DEADLINE_HOUR,minute:DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE});return normalizeRismaClosingDeadlineParts(rismaBonusSettings||{},{hour:DEFAULT_RISMA_CLOSING_DEADLINE_HOUR,minute:DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE});}
+function getRismaClosingDeadlineTimeLabel(source=null){const p=getRismaClosingDeadlineParts(source);return `${String(p.hour).padStart(2,'0')}:${String(p.minute).padStart(2,'0')}`;}
+function getRismaClosingDeadlineMinutes(source=null){const p=getRismaClosingDeadlineParts(source);return (p.hour*60)+p.minute;}
+function getRismaClosingDeadlineSnapshot(source=null){const p=getRismaClosingDeadlineParts(source),label=`${String(p.hour).padStart(2,'0')}:${String(p.minute).padStart(2,'0')}`;return{deadline:`${label} WIB`,deadlineTime:label,deadlineHour:p.hour,deadlineMinute:p.minute,deadlineMinutes:(p.hour*60)+p.minute,closingDeadlineTime:label,closingDeadlineHour:p.hour,closingDeadlineMinute:p.minute,closingDeadlineMinutes:(p.hour*60)+p.minute};}
+function normalizeRismaBonusSettings(data={}){const d=data||{},defs=getDefaultRismaBonusSettings(),parts=normalizeRismaClosingDeadlineParts(d,{hour:DEFAULT_RISMA_CLOSING_DEADLINE_HOUR,minute:DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE}),label=`${String(parts.hour).padStart(2,'0')}:${String(parts.minute).padStart(2,'0')}`,rate=Number.isFinite(Number(d.transactionBonusRate))?Number(d.transactionBonusRate):defs.transactionBonusRate,pct=Number.isFinite(Number(d.transactionBonusPercent))?Number(d.transactionBonusPercent):Number((rate*100).toFixed(3)),closing=Number.isFinite(Number(d.closingBonusPerMinute))?Number(d.closingBonusPerMinute):defs.closingBonusPerMinute;return{transactionBonusRate:rate,transactionBonusPercent:pct,closingBonusPerMinute:closing,closingDeadlineTime:label,closingDeadlineHour:parts.hour,closingDeadlineMinute:parts.minute,closingDeadlineMinutes:(parts.hour*60)+parts.minute,updatedAtMs:Number(d.updatedAtMs||0),updatedByName:d.updatedByName||'',updatedBy:d.updatedBy||''};}
 function askRismaClosingPin(message='Masukkan PIN Risma:', title='Verifikasi PIN Risma'){
   return new Promise((resolve)=>{
     const old=document.getElementById('risma-closing-pin-modal');
@@ -3561,14 +3570,9 @@ async function fetchLatestRismaBonusBeforeSave(){
   if(!userSnap.exists)throw new Error('User Risma tidak ditemukan saat cek bonus terbaru');
   if(bonusSnap.exists){
     const data=bonusSnap.data()||{};
-    rismaBonusSettings={
-      transactionBonusRate:Number.isFinite(Number(data.transactionBonusRate))?Number(data.transactionBonusRate):DEFAULT_RISMA_BONUS_RATE,
-      closingBonusPerMinute:Number.isFinite(Number(data.closingBonusPerMinute))?Number(data.closingBonusPerMinute):DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE,
-      updatedAtMs:Number(data.updatedAtMs||0),
-      updatedByName:data.updatedByName||''
-    };
+    rismaBonusSettings=normalizeRismaBonusSettings(data);
   }else{
-    rismaBonusSettings={transactionBonusRate:DEFAULT_RISMA_BONUS_RATE,closingBonusPerMinute:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE};
+    rismaBonusSettings=getDefaultRismaBonusSettings();
   }
   const rawUser=userSnap.data()||{};
   const freshRole=normalizeRismaRole(rawUser.role||'staff');
@@ -3703,14 +3707,13 @@ function getRismaCurrentWIBTimeLabel(date=new Date()){
   const p=getRismaWibParts(date);
   return `${p.hour}:${p.minute}`;
 }
-function getRismaClosingDeadlineLabel(){
-  return `${String(RISMA_CLOSING_DEADLINE_HOUR).padStart(2,'0')}:${String(RISMA_CLOSING_DEADLINE_MINUTE).padStart(2,'0')} WIB`;
+function getRismaClosingDeadlineLabel(source=null){
+  return `${getRismaClosingDeadlineTimeLabel(source)} WIB`;
 }
-function getRismaClosingDelayMinutes(date=new Date()){
+function getRismaClosingDelayMinutes(date=new Date(),source=null){
   const p=getRismaWibParts(date);
   const current=(Number(p.hour)*60)+Number(p.minute);
-  const deadline=(RISMA_CLOSING_DEADLINE_HOUR*60)+RISMA_CLOSING_DEADLINE_MINUTE;
-  return Math.max(0,current-deadline);
+  return Math.max(0,current-getRismaClosingDeadlineMinutes(source));
 }
 function getRismaManualClosingAllowedUsers(){
   const arr=Array.isArray(rismaManualClosingConfig?.allowedUsers)?rismaManualClosingConfig.allowedUsers:[];
@@ -3897,12 +3900,13 @@ async function handleRismaManualClosingTarget(username){
       return showToast(`${profile.name||profile.username||target} belum absen, jadi tidak perlu closing`);
     }
     const isBonusEligible=role!=='harian'&&role!=='admin'&&attended;
-    const delayMinutes=getRismaClosingDelayMinutes();
+    const deadlineSnapshot=getRismaClosingDeadlineSnapshot();
+    const delayMinutes=getRismaClosingDelayMinutes(new Date(),deadlineSnapshot);
     const perMinute=getRismaTargetClosingBonusPerMinute(profile);
     const bonus=isBonusEligible?Math.round(delayMinutes*perMinute):0;
     const currentClosingTime=getRismaCurrentWIBTimeLabel();
     const name=profile.name||profile.username||target;
-    const msg=`Closing ${name} sekarang?\nLewat deadline: ${delayMinutes} menit\nBonus closing: ${bonus?formatRupiah(bonus):'Rp 0'}${role==='harian'?'\nCatatan: karyawan harian boleh diclosing tanpa absen dan bonus closing Rp 0.':''}`;
+    const msg=`Closing ${name} sekarang?\nDeadline: ${deadlineSnapshot.deadline}\nLewat deadline: ${delayMinutes} menit\nBonus closing: ${bonus?formatRupiah(bonus):'Rp 0'}${role==='harian'?'\nCatatan: karyawan harian boleh diclosing tanpa absen dan bonus closing Rp 0.':''}`;
     if(!confirm(msg))return;
     const docId=getRismaManualClosingDocId(target,today);
     const payload={
@@ -3929,7 +3933,7 @@ async function handleRismaManualClosingTarget(username){
       canceled:false,
       canceledAtMs:null,
       editedAtMs:null,
-      deadline:getRismaClosingDeadlineLabel(),
+      ...deadlineSnapshot,
       delayMinutes,
       bonusPerMinute:perMinute,
       bonusPerMinuteByUser:{[target]:perMinute},
@@ -3983,6 +3987,7 @@ async function handleRismaManualClosingAll(){
       renderRismaManualClosingPanel();
       return;
     }
+    const deadlineSnapshot=getRismaClosingDeadlineSnapshot();
     let success=0, skipped=0, totalBonus=0;
     const failed=[];
     for(const target of pending){
@@ -4000,7 +4005,7 @@ async function handleRismaManualClosingAll(){
           continue;
         }
         const isBonusEligible=role!=='harian'&&role!=='admin'&&attended;
-        const delayMinutes=getRismaClosingDelayMinutes();
+        const delayMinutes=getRismaClosingDelayMinutes(new Date(),deadlineSnapshot);
         const perMinute=getRismaTargetClosingBonusPerMinute(profile);
         const bonus=isBonusEligible?Math.round(delayMinutes*perMinute):0;
         const currentClosingTime=getRismaCurrentWIBTimeLabel();
@@ -4031,7 +4036,7 @@ async function handleRismaManualClosingAll(){
           canceled:false,
           canceledAtMs:null,
           editedAtMs:null,
-          deadline:getRismaClosingDeadlineLabel(),
+          ...deadlineSnapshot,
           delayMinutes,
           bonusPerMinute:perMinute,
           bonusPerMinuteByUser:{[target]:perMinute},
@@ -4576,14 +4581,9 @@ function startRismaBonusSettingsWatch(){
   rismaBonusSettingsUnsub=firebaseDb.collection('closings').doc('__bonus_settings').onSnapshot(doc=>{
     if(doc.exists){
       const data=doc.data()||{};
-      rismaBonusSettings={
-        transactionBonusRate:Number.isFinite(Number(data.transactionBonusRate))?Number(data.transactionBonusRate):DEFAULT_RISMA_BONUS_RATE,
-        closingBonusPerMinute:Number.isFinite(Number(data.closingBonusPerMinute))?Number(data.closingBonusPerMinute):DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE,
-        updatedAtMs:Number(data.updatedAtMs||0),
-        updatedByName:data.updatedByName||''
-      };
+      rismaBonusSettings=normalizeRismaBonusSettings(data);
     }else{
-      rismaBonusSettings={transactionBonusRate:DEFAULT_RISMA_BONUS_RATE,closingBonusPerMinute:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE};
+      rismaBonusSettings=getDefaultRismaBonusSettings();
     }
     renderRismaMonthBonus();
     renderStaffDailySummary();
@@ -4992,13 +4992,8 @@ async function refreshRismaFirebaseDataOnce(){
   jobs.push(firebaseDb.collection('closings').doc('__bonus_settings').get({source:'server'}).then(doc=>{
     if(doc.exists){
       const data=doc.data()||{};
-      rismaBonusSettings={
-        transactionBonusRate:Number.isFinite(Number(data.transactionBonusRate))?Number(data.transactionBonusRate):DEFAULT_RISMA_BONUS_RATE,
-        closingBonusPerMinute:Number.isFinite(Number(data.closingBonusPerMinute))?Number(data.closingBonusPerMinute):DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE,
-        updatedAtMs:Number(data.updatedAtMs||0),
-        updatedByName:data.updatedByName||''
-      };
-    }else rismaBonusSettings={transactionBonusRate:DEFAULT_RISMA_BONUS_RATE,closingBonusPerMinute:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE};
+      rismaBonusSettings=normalizeRismaBonusSettings(data);
+    }else rismaBonusSettings=getDefaultRismaBonusSettings();
   }).catch(e=>console.warn('Refresh bonus settings Risma gagal:',e)));
   jobs.push(firebaseDb.collection('closings').doc('__risma_manual_closing').get({source:'server'}).then(doc=>{
     rismaManualClosingConfig=doc.exists?{id:doc.id,enabled:true,allowedUsers:[],allowedNames:{},...(doc.data()||{})}:{id:RISMA_USERNAME,enabled:true,allowedUsers:[],allowedNames:{}};
