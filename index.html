@@ -3408,6 +3408,42 @@ async function notifyAdminRismaTransaction({amount,note,paymentMethod,displayNam
   }
 }
 
+async function notifyAdminRismaTransactionDelete({amount,note,paymentMethod,displayName,docId}={}){
+  // Notifikasi hapus transaksi Risma tidak boleh menggagalkan proses hapus.
+  const workerBase=String(ROCKY_NOTIFY_WORKER_BASE||'').replace(/\/+$/,'');
+  if(!workerBase)return;
+  const controller=(typeof AbortController!=='undefined')?new AbortController():null;
+  const timeout=controller?setTimeout(()=>controller.abort(),4500):null;
+  try{
+    await fetch(`${workerBase}/notify-transaction-delete`,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'X-Notify-Secret':ROCKY_NOTIFY_SECRET
+      },
+      body:JSON.stringify({
+        staff:displayName||RISMA_NAME||'Risma',
+        user:displayName||RISMA_NAME||'Risma',
+        name:displayName||RISMA_NAME||'Risma',
+        amount:Number(amount||0),
+        desc:note||'Transaksi Risma',
+        note:note||'Transaksi Risma',
+        payment:paymentMethod||'',
+        paymentMethod:paymentMethod||'',
+        docId:docId||'',
+        source:'risma_direct_delete',
+        app:'catatantoko_risma',
+        createdAt:new Date().toISOString()
+      }),
+      signal:controller?controller.signal:undefined
+    });
+  }catch(err){
+    console.warn('Notifikasi admin hapus transaksi Risma gagal:',err);
+  }finally{
+    if(timeout)clearTimeout(timeout);
+  }
+}
+
 
 function getDefaultRismaBonusSettings(){return{transactionBonusRate:DEFAULT_RISMA_BONUS_RATE,transactionBonusPercent:Number((DEFAULT_RISMA_BONUS_RATE*100).toFixed(3)),closingBonusPerMinute:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE,closingDeadlineTime:DEFAULT_RISMA_CLOSING_DEADLINE_TIME,closingDeadlineHour:DEFAULT_RISMA_CLOSING_DEADLINE_HOUR,closingDeadlineMinute:DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE,closingDeadlineMinutes:(DEFAULT_RISMA_CLOSING_DEADLINE_HOUR*60)+DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE};}
 function normalizeRismaClosingDeadlineParts(value=null,fallback=null){const fb=fallback||{hour:DEFAULT_RISMA_CLOSING_DEADLINE_HOUR,minute:DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE};if(value&&typeof value==='object'){const direct=value.deadlineTime??value.closingDeadlineTime??value.deadline??value.jamClosing??value.jam_closing??value.label??null;if(direct!==null&&direct!==undefined&&String(direct).trim()!=='')return normalizeRismaClosingDeadlineParts(direct,fb);const h=Number(value.deadlineHour??value.closingDeadlineHour??value.hour),m=Number(value.deadlineMinute??value.closingDeadlineMinute??value.minute);if(Number.isInteger(h)&&Number.isInteger(m)&&h>=0&&h<=23&&m>=0&&m<=59)return{hour:h,minute:m};const total=Number(value.deadlineMinutes??value.closingDeadlineMinutes??NaN);if(Number.isFinite(total)&&total>=0)return{hour:Math.floor(total/60)%24,minute:Math.floor(total%60)};return fb;}const raw=String(value??'').trim().replace('.',':').replace(/\s*WIB$/i,'');const match=raw.match(/^(\d{1,2}):(\d{2})/);if(match){const h=Number(match[1]),m=Number(match[2]);if(Number.isInteger(h)&&Number.isInteger(m)&&h>=0&&h<=23&&m>=0&&m<=59)return{hour:h,minute:m};}return fb;}
@@ -4942,6 +4978,13 @@ async function deleteRismaTransaction(docId){
       deletedAtMs:Date.now(),
       deletedBy:RISMA_USERNAME,
       deletedByName:getRismaDisplayName()
+    });
+    await notifyAdminRismaTransactionDelete({
+      amount:Number(target.amount||0),
+      note:target.note||target.keterangan||target.description||'Transaksi Risma',
+      paymentMethod:target.paymentLabel||target.metodePembayaran||target.paymentMethod||target.paymentType||'',
+      displayName:getRismaDisplayName(),
+      docId
     });
     await refreshCoreFirebaseDataOnce();
     render();
