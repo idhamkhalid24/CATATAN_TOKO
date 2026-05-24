@@ -1347,6 +1347,10 @@ const SUPABASE_ANON_KEY='sb_publishable_aG-kyasJNCEk2U9fN5T4qg_GfY0FpPH';
 const SERVER_SUPABASE_URL='https://ismjupxoiywttkrekmfg.supabase.co';
 const SERVER_SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6ImlzbWp1cHhvaXl3dHRrcmVrbWZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzc4MDEsImV4cCI6MjA5NDg1MzgwMX0.WVwqEdkPQ_x9NWR8QXTm85mIAvN8d9V2FaMJ2NiAMC0'.replace('eyJpc3MiOiJIUzI1NiIs','eyJpc3MiOiJzdXBhYmFzZSIs');
 const OWNER_ID='rocky-hijab'; const APP_PIN='170845';
+// === NOTIF ADMIN FCM ===
+// Sama seperti index staff: transaksi Risma kirim notifikasi ke AdminLite lewat Cloudflare Worker.
+const ROCKY_NOTIFY_WORKER_BASE='https://rocky-notif-worker.alfajrihanif24.workers.dev';
+const ROCKY_NOTIFY_SECRET='rockyNotifRahasia2026';
 const PAGE_KEY='risma_finance_last_page_v1';
 const RESTORABLE_PAGES=['home','history','firebase','risma','staffDaily'];
 const FIREBASE_CONFIG={
@@ -3372,6 +3376,38 @@ function getRismaDisplayName(){
   return String(rismaUserProfile?.name||RISMA_NAME||RISMA_USERNAME).trim()||RISMA_NAME;
 }
 
+async function notifyAdminRismaTransaction({amount,note,paymentMethod,displayName}={}){
+  // Notifikasi tidak boleh menggagalkan simpan transaksi Risma.
+  const workerBase=String(ROCKY_NOTIFY_WORKER_BASE||'').replace(/\/+$/,'');
+  if(!workerBase)return;
+  const controller=(typeof AbortController!=='undefined')?new AbortController():null;
+  const timeout=controller?setTimeout(()=>controller.abort(),4500):null;
+  try{
+    await fetch(`${workerBase}/notify-transaction`,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'X-Notify-Secret':ROCKY_NOTIFY_SECRET
+      },
+      body:JSON.stringify({
+        user:displayName||RISMA_NAME||'Risma',
+        name:displayName||RISMA_NAME||'Risma',
+        amount:Number(amount||0),
+        note:note||'Transaksi Risma',
+        paymentMethod:paymentMethod||'',
+        source:'risma_direct',
+        app:'catatantoko_risma',
+        createdAt:new Date().toISOString()
+      }),
+      signal:controller?controller.signal:undefined
+    });
+  }catch(err){
+    console.warn('Notifikasi admin Risma gagal:',err);
+  }finally{
+    if(timeout)clearTimeout(timeout);
+  }
+}
+
 
 function getDefaultRismaBonusSettings(){return{transactionBonusRate:DEFAULT_RISMA_BONUS_RATE,transactionBonusPercent:Number((DEFAULT_RISMA_BONUS_RATE*100).toFixed(3)),closingBonusPerMinute:DEFAULT_RISMA_CLOSING_BONUS_PER_MINUTE,closingDeadlineTime:DEFAULT_RISMA_CLOSING_DEADLINE_TIME,closingDeadlineHour:DEFAULT_RISMA_CLOSING_DEADLINE_HOUR,closingDeadlineMinute:DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE,closingDeadlineMinutes:(DEFAULT_RISMA_CLOSING_DEADLINE_HOUR*60)+DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE};}
 function normalizeRismaClosingDeadlineParts(value=null,fallback=null){const fb=fallback||{hour:DEFAULT_RISMA_CLOSING_DEADLINE_HOUR,minute:DEFAULT_RISMA_CLOSING_DEADLINE_MINUTE};if(value&&typeof value==='object'){const direct=value.deadlineTime??value.closingDeadlineTime??value.deadline??value.jamClosing??value.jam_closing??value.label??null;if(direct!==null&&direct!==undefined&&String(direct).trim()!=='')return normalizeRismaClosingDeadlineParts(direct,fb);const h=Number(value.deadlineHour??value.closingDeadlineHour??value.hour),m=Number(value.deadlineMinute??value.closingDeadlineMinute??value.minute);if(Number.isInteger(h)&&Number.isInteger(m)&&h>=0&&h<=23&&m>=0&&m<=59)return{hour:h,minute:m};const total=Number(value.deadlineMinutes??value.closingDeadlineMinutes??NaN);if(Number.isFinite(total)&&total>=0)return{hour:Math.floor(total/60)%24,minute:Math.floor(total%60)};return fb;}const raw=String(value??'').trim().replace('.',':').replace(/\s*WIB$/i,'');const match=raw.match(/^(\d{1,2}):(\d{2})/);if(match){const h=Number(match[1]),m=Number(match[2]);if(Number.isInteger(h)&&Number.isInteger(m)&&h>=0&&h<=23&&m>=0&&m<=59)return{hour:h,minute:m};}return fb;}
@@ -4843,6 +4879,12 @@ async function addRismaTransaction(paymentMethod){
       source:'risma_direct'
     };
     const docRef=await firebaseDb.collection('transactions').add(payload);
+    await notifyAdminRismaTransaction({
+      amount,
+      note:desc,
+      paymentMethod:pay.label||pay.method,
+      displayName
+    });
     if(isFirebaseQrisPayment(payload)){
       const changed=await syncFirebaseQrisCashOut([{...payload,_docId:docRef.id,id:docRef.id}],{quiet:true,date:today});
       if(changed)await loadTransactions();
