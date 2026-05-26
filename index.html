@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="risma-hide-mode">
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -895,39 +895,42 @@
     .report-kpi span{display:block;font-size:9px;color:var(--muted);font-weight:900;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.3px}
     .report-kpi b{display:block;margin-top:4px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:900}
 
-  </style>
+  
+
+    /* === PATCH FINAL: HIDE DIHAPUS, NAV TINGGAL HOME / STAFF / RISMA === */
+    #hideToggleBtn,#hidePinModal{display:none!important}
+    .sensitive-wrap.sensitive-hidden .sens-bar,
+    .sensitive-hidden .sens-bar{display:block!important}
+    .sensitive-wrap-history.sensitive-hidden{visibility:visible!important}
+    .hidden-mode-shortcuts{display:none!important}
+    #nav-history,#nav-laporan,#nav-firebase{display:none!important}
+    #bottomNav{grid-template-columns:repeat(3,1fr)!important}
+
+
+    /* === PATCH HOME CLEAN: sesuai request === */
+    #fabBtn{display:none!important}
+    .profit-summary-card,#zakatMalCard{display:none!important}
+    #hiddenModeShortcuts.hidden-mode-shortcuts{
+      display:grid!important;
+      grid-template-columns:1fr 1fr!important;
+      gap:8px!important;
+      margin:10px 0 0!important;
+    }
+    #hiddenModeShortcuts .shortcut-btn{
+      display:block!important;
+      width:100%!important;
+      min-height:48px!important;
+      border-radius:16px!important;
+      padding:12px 10px!important;
+      font-size:13px!important;
+      font-weight:900!important;
+      box-shadow:var(--shadow)!important;
+    }
+
+</style>
 </head>
 <body>
   <div id="passwordModal" class="modal hidden"><div class="box"><h3 style="margin:0 0 6px;text-align:center">Verifikasi PIN</h3><p class="small" style="text-align:center;margin-top:0">Masukkan PIN untuk hapus transaksi</p><input type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" id="confirmPasswordInput" placeholder="PIN" maxlength="8" style="text-align:center;font-size:24px;letter-spacing:6px"><div class="row" style="margin-top:10px"><button class="btn secondary" onclick="closePasswordModal()">Batal</button><button id="btnConfirmAction" class="btn">Lanjut</button></div></div></div>
-
-  <!-- Modal PIN Hide Toggle -->
-  <div id="hidePinModal" class="modal hidden">
-    <div class="box" style="max-width:300px;text-align:center">
-      <div style="font-size:28px;margin-bottom:8px">🔒</div>
-      <h3 style="margin:0 0 4px">Masukkan PIN</h3>
-      <p class="small" style="margin:0 0 14px">Untuk membuka data tersembunyi</p>
-      <!-- Dot display -->
-      <div id="hidePinDots" style="display:flex;justify-content:center;gap:10px;margin-bottom:16px">
-        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-      </div>
-      <!-- Numpad -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:220px;margin:0 auto">
-        <button class="pin-key" onclick="hidePinPress('1')">1</button>
-        <button class="pin-key" onclick="hidePinPress('2')">2</button>
-        <button class="pin-key" onclick="hidePinPress('3')">3</button>
-        <button class="pin-key" onclick="hidePinPress('4')">4</button>
-        <button class="pin-key" onclick="hidePinPress('5')">5</button>
-        <button class="pin-key" onclick="hidePinPress('6')">6</button>
-        <button class="pin-key" onclick="hidePinPress('7')">7</button>
-        <button class="pin-key" onclick="hidePinPress('8')">8</button>
-        <button class="pin-key" onclick="hidePinPress('9')">9</button>
-        <button class="pin-key" onclick="hidePinClear()" style="background:#fff0ee;color:var(--red)">⌫</button>
-        <button class="pin-key" onclick="hidePinPress('0')">0</button>
-        <button class="pin-key" onclick="closeHidePinModal()" style="background:#eef2e8;color:var(--muted)">✕</button>
-      </div>
-      <div id="hidePinError" style="color:var(--red);font-size:12px;font-weight:900;margin-top:10px;min-height:18px"></div>
-    </div>
-  </div>
   <div id="zakatHistoryModal" class="modal hidden"><div class="box"><h3 style="margin:0 0 12px;text-align:center">Riwayat Zakat</h3><div id="zakatHistoryList"></div><button class="btn gold" onclick="closeZakatHistoryModal()" style="margin-top:12px">Tutup</button></div></div>
   <div id="backupOptionModal" class="modal hidden"><div class="box"><h3 style="margin:0 0 12px;text-align:center">Backup</h3><div class="compact-actions"><button class="btn secondary" onclick="exportToFile()">File JSON</button><button class="btn secondary" onclick="copyToClipboard()">Salin</button><button class="btn secondary" onclick="showImportModal()">Import</button><button class="btn secondary" onclick="closeBackupModal()">Tutup</button></div></div></div>
   <div id="importModal" class="modal hidden"><div class="box"><h3 style="margin:0 0 12px;text-align:center">Import JSON</h3><textarea id="importDataText" rows="7" placeholder="Tempel data JSON di sini..."></textarea><div class="row" style="margin-top:10px"><button class="btn secondary" onclick="closeImportModal()">Batal</button><button class="btn" onclick="importFromText()">Import</button></div></div></div>
@@ -1024,15 +1027,12 @@
       <div class="brand">
         <div><h1 style="margin:0;font-size:17px">Risma</h1><small style="display:block;color:var(--muted);font-size:11px;margin-top:2px">Finance & Zakat</small></div>
         <button id="btnRefreshData" onclick="refreshAllData()" class="refresh-data-btn" title="Refresh data" aria-label="Refresh data">↻</button>
-        <button id="hideToggleBtn" onclick="toggleSensitiveData()" class="hide-toggle-btn" title="Sembunyikan/tampilkan data sensitif">
-          <svg id="hideIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-        </button>
+
         <div id="statusBadge" class="pill"><span id="statusText">Aman</span></div>
       </div>
     </div>
 
     <section id="pageHome" class="page active sensitive-wrap">
-      <div class="sens-bar"><div class="hero"><div class="label">Saldo Bersih · Semua Data Supabase</div><div id="netBalance" class="value num">Rp 0</div><div class="mini"><span>Masuk <b id="totalIncome">Rp 0</b></span><span>Keluar Hari Ini <b id="totalExpense" onclick="showExpenseListTodayModal()" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px">Rp 0</b></span></div></div></div>
 
       <!-- Cash Fisik Card Gabungan (Ops Toko + QRIS + Tabungan) -->
       <div class="card" style="margin-bottom:10px;background:#eff6ff;border-color:#bfdbfe">
@@ -1071,37 +1071,38 @@
       <div id="todayFirebaseIncomeHome" class="hidden"></div>
       <div id="todayIncomeSectionTitle" class="hidden"></div>
 
-      <!-- Ringkasan Laba dengan Filter -->
-      <div class="profit-summary-card">
-        <div class="ps-head">
-          <div class="ps-title">Ringkasan Laba</div>
-          <div class="ps-filters">
-            <button class="ps-tab active" id="ps-tab-today" onclick="setProfitFilter('today')">Hari Ini</button>
-            <button class="ps-tab" id="ps-tab-month" onclick="setProfitFilter('month')">Bulan</button>
-            <button class="ps-tab" id="ps-tab-year" onclick="setProfitFilter('year')">Tahun</button>
-            <button class="ps-tab" id="ps-tab-custom" onclick="setProfitFilter('custom')">Custom</button>
-          </div>
-        </div>
-        <div id="psCustomRange" class="ps-range-row" style="display:none;margin-bottom:10px">
-          <input type="date" id="psStartDate" onchange="renderProfitSummary()">
-          <input type="date" id="psEndDate" onchange="renderProfitSummary()">
-        </div>
-        <div class="ps-value num" id="psLaba">Rp 0</div>
-        <div class="ps-desc" id="psDesc">Sisa operasional = limit 20% - pengeluaran</div>
-        <div class="ps-grid">
-          <div class="ps-box"><span>Pendapatan</span><b id="psPendapatan" class="num">Rp 0</b></div>
-          <div class="ps-box"><span>Terpakai</span><b id="psPengeluaran" class="num" style="color:#ff8a80">Rp 0</b></div>
-          <div class="ps-box"><span>Limit 20%</span><b id="psLabaBersih" class="num" style="color:#69f0ae">Rp 0</b></div>
-        </div>
-      </div>
-      <div class="grid2">
-        <div class="stat sens-bar"><span>Laba 20% (Semua)</span><b id="autoProfit" class="blue num">Rp 0</b></div>
-        <div class="stat" onclick="showExpenseListTodayModal()" style="cursor:pointer;border-color:#ffd7d0;background:#fff8f6"><span>Pengeluaran Hari Ini</span><b id="spendingLimit" class="red num">Rp 0</b><div style="font-size:9px;color:var(--red);font-weight:900;margin-top:3px">Tap untuk lihat detail</div></div>
+      <!-- Ringkasan Laba disembunyikan sesuai permintaan; elemen ID tetap ada agar logika tidak error -->
+      <div id="profitSummaryHidden" class="hidden" aria-hidden="true">
+        <button class="ps-tab active" id="ps-tab-today" type="button"></button>
+        <button class="ps-tab" id="ps-tab-month" type="button"></button>
+        <button class="ps-tab" id="ps-tab-year" type="button"></button>
+        <button class="ps-tab" id="ps-tab-custom" type="button"></button>
+        <div id="psCustomRange" style="display:none"><input type="date" id="psStartDate"><input type="date" id="psEndDate"></div>
+        <div id="psLaba">Rp 0</div>
+        <div id="psDesc"></div>
+        <div id="psPendapatan">Rp 0</div>
+        <div id="psPengeluaran">Rp 0</div>
+        <div id="psLabaBersih">Rp 0</div>
       </div>
 
-      <div id="operationalCard" class="card safe-card sens-bar" style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:8px"><b>Sisa Operasional</b><b id="operationalUsed" class="num">Rp 0</b></div><div class="small">Ikut filter Ringkasan Laba · Limit 20%: <span id="operationalTotal">Rp 0</span> · Terpakai: <span id="operationalSpent">Rp 0</span></div><div id="limitWarning" class="small red" style="font-weight:900;margin-top:5px"></div></div>
-      <div id="zakatMalCard" class="card sens-bar"><div style="display:flex;justify-content:space-between;align-items:start;gap:8px"><div><div class="section-title" style="margin:0 0 3px">Zakat Mal</div><div id="zakatAmountLarge" class="num gold" style="font-size:23px">Rp 0</div><div id="zakatPaymentStatusText" class="small">Menunggu</div></div><button id="payZakatBtn" class="btn gold" style="width:auto;min-width:92px;padding:10px" onclick="markZakatPaid()">Bayar</button></div><div class="grid2" style="margin-top:10px"><div class="stat"><span>Laba 20% Final s.d H-1</span><b id="totalProfitDisplay" class="num">Rp 0</b></div><div class="stat"><span>Belum Dizakatkan Final</span><b id="unpaidProfitDisplay" class="num">Rp 0</b></div></div><div id="zakatBasisInfo" style="font-size:10px;color:var(--muted);font-weight:800;margin-top:7px;padding-top:7px;border-top:1px solid var(--line)">Zakat = 2.5% × laba 20% dari data final sampai kemarin. Transaksi hari ini masuk hitungan besok setelah Supabase sync/LOCK.</div><div style="display:none"><span id="totalZakatPaidProfit">Rp 0</span></div><div id="zakatHistoryPreview" class="zakat-mini" style="display:none"><div id="zakatHistoryMiniList" class="zakat-mini"></div><button class="tab" onclick="showZakatHistoryModal()">Semua</button></div></div>
-      <button class="btn whatsapp" onclick="sendWhatsAppReport()">Laporan WA</button>
+      <div class="hidden" aria-hidden="true"><b id="autoProfit" class="blue num">Rp 0</b></div>
+      <div style="margin-bottom:10px">
+        <div class="stat" style="border-color:#ffd7d0;background:#fff8f6;width:100%;padding:15px 16px"><span>Pengeluaran Bulan Ini</span><b id="spendingLimit" class="red num" style="font-size:20px">Rp 0</b></div>
+      </div>
+
+      <!-- Sisa Operasional disembunyikan dari Home; ID tetap disediakan agar logika lama tidak error -->
+      <div id="operationalCard" style="display:none!important" aria-hidden="true"><b id="operationalUsed" class="num">Rp 0</b><span id="operationalTotal">Rp 0</span><span id="operationalSpent">Rp 0</span><div id="limitWarning"></div></div>
+      <!-- Zakat Mal disembunyikan sesuai permintaan; elemen ID tetap ada agar logika tidak error -->
+      <div id="zakatMalHidden" class="hidden" aria-hidden="true">
+        <div id="zakatAmountLarge">Rp 0</div>
+        <div id="zakatPaymentStatusText">Menunggu</div>
+        <button id="payZakatBtn" type="button" onclick="markZakatPaid()">Bayar</button>
+        <div id="totalProfitDisplay">Rp 0</div>
+        <div id="totalZakatPaidProfit">Rp 0</div>
+        <div id="unpaidProfitDisplay">Rp 0</div>
+        <div id="zakatBasisInfo"></div>
+        <div id="zakatHistoryPreview" style="display:none"><div id="zakatHistoryMiniList"></div></div>
+      </div>
       <div id="hiddenModeShortcuts" class="hidden-mode-shortcuts">
         <button class="shortcut-btn ops" onclick="openOpsModal()">Oprasional Toko</button>
         <button class="shortcut-btn qris" onclick="openCashOutModal()">+ QRIS</button>
@@ -1433,13 +1434,9 @@
       </div>
     </div>
 
-  <button id="fabBtn" class="fab" onclick="openTransactionModal()" aria-label="Input transaksi">+</button>
   <button id="rismaFabBtn" class="fab risma-fab" onclick="openRismaTransactionModal()" aria-label="Input penjualan Risma">+</button>
-  <nav id="bottomNav" class="nav" style="grid-template-columns:repeat(6,1fr)">
+  <nav id="bottomNav" class="nav" style="grid-template-columns:repeat(3,1fr)">
     <button id="nav-home" class="active" onclick="goPage('home')">🏠 Home</button>
-    <button id="nav-history" onclick="goPage('history')">📋 Riwayat</button>
-    <button id="nav-laporan" onclick="goPage('laporan')" style="color:#c2410c">📊 Laporan</button>
-    <button id="nav-firebase" onclick="goPage('firebase')">Server</button>
     <button id="nav-staffDaily" onclick="goPage('staffDaily')" style="color:#7c3aed">👥 Staff</button>
     <button id="nav-risma" onclick="goPage('risma')" style="color:#be185d">👩 Risma</button>
   </nav>
@@ -1459,7 +1456,7 @@ const OWNER_ID='rocky-hijab'; const APP_PIN='170845';
 const ROCKY_NOTIFY_WORKER_BASE='https://rocky-notif-worker.alfajrihanif24.workers.dev';
 const ROCKY_NOTIFY_SECRET='rockyNotifRahasia2026';
 const PAGE_KEY='risma_finance_last_page_v1';
-const RESTORABLE_PAGES=['home','history','laporan','firebase','risma','staffDaily'];
+const RESTORABLE_PAGES=['home','staffDaily','risma'];
 const FIREBASE_CONFIG={
   apiKey:"AIzaSyAqmTEKnLKOXcmOoR9RrXksNe5_Fix42w8",
   authDomain:"rocky-fd14b.firebaseapp.com",
@@ -1536,104 +1533,20 @@ function playRismaSuccessSound(){
   window.addEventListener(evt,unlockRismaSuccessSound,{once:true,passive:true});
 });
 
-// === HIDE SENSITIVE DATA ===
-const HIDE_PIN='1993';
-let sensitiveHidden=true;
-let hidePinBuffer='';
-
-function toggleSensitiveData(){
-  if(sensitiveHidden){
-    // Mau buka → minta PIN
-    openHidePinModal();
-  } else {
-    // Mau tutup → langsung
-    doHide();
-  }
-}
-
-function doReveal(){
+// === HIDE FEATURE REMOVED: app selalu menampilkan mode normal ===
+let sensitiveHidden=false;
+function toggleSensitiveData(){/* fitur hide sudah dihapus */}
+function doReveal(){sensitiveHidden=false;document.documentElement.classList.remove('risma-hide-mode');updateBottomNavForHideMode();updateRismaFabVisibility();}
+function doHide(){doReveal();}
+function openHidePinModal(){}
+function closeHidePinModal(){}
+function hidePinPress(){}
+function hidePinClear(){}
+function updatePinDots(){}
+window.addEventListener('load',function(){
   sensitiveHidden=false;
   document.documentElement.classList.remove('risma-hide-mode');
-  const wrap=document.querySelector('.sensitive-wrap');
-  const histWrap=document.querySelector('.sensitive-wrap-history');
-  const fab=$('fabBtn');
-  const icon=$('hideIcon');
-  wrap&&wrap.classList.remove('sensitive-hidden');
-  histWrap&&histWrap.classList.remove('sensitive-hidden');
-  if(fab)fab.style.display='grid';
-  updateBottomNavForHideMode();
-  updateRismaFabVisibility();
-  icon.innerHTML='<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-}
-
-function doHide(){
-  sensitiveHidden=true;
-  document.documentElement.classList.add('risma-hide-mode');
-  const wrap=document.querySelector('.sensitive-wrap');
-  const histWrap=document.querySelector('.sensitive-wrap-history');
-  const fab=$('fabBtn');
-  const icon=$('hideIcon');
-  wrap&&wrap.classList.add('sensitive-hidden');
-  histWrap&&histWrap.classList.add('sensitive-hidden');
-  if(fab)fab.style.display='none';
-  document.documentElement.classList.add('risma-hide-mode');
-  if(HIDE_MODE_NAV_PAGES.includes(currentPage))goPage('home');
-  updateBottomNavForHideMode();
-  updateRismaFabVisibility();
-  icon.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
-}
-
-function openHidePinModal(){
-  hidePinBuffer='';
-  updatePinDots();
-  $('hidePinError').textContent='';
-  $('hidePinModal').classList.remove('hidden');
-}
-
-function closeHidePinModal(){
-  hidePinBuffer='';
-  updatePinDots();
-  $('hidePinError').textContent='';
-  $('hidePinModal').classList.add('hidden');
-}
-
-function hidePinPress(d){
-  if(hidePinBuffer.length>=4)return;
-  hidePinBuffer+=d;
-  updatePinDots();
-  if(hidePinBuffer.length===4){
-    setTimeout(()=>{
-      if(hidePinBuffer===HIDE_PIN){
-        closeHidePinModal();
-        doReveal();
-      } else {
-        $('hidePinError').textContent='PIN salah, coba lagi';
-        hidePinBuffer='';
-        updatePinDots();
-      }
-    },120);
-  }
-}
-
-function hidePinClear(){
-  hidePinBuffer=hidePinBuffer.slice(0,-1);
-  updatePinDots();
-  $('hidePinError').textContent='';
-}
-
-function updatePinDots(){
-  const dots=document.querySelectorAll('#hidePinDots .pin-dot');
-  dots.forEach((d,i)=>d.classList.toggle('filled',i<hidePinBuffer.length));
-}
-
-window.addEventListener('load',function(){
-  const wrap=document.querySelector('.sensitive-wrap');
-  const histWrap=document.querySelector('.sensitive-wrap-history');
-  if(wrap)wrap.classList.add('sensitive-hidden');
-  if(histWrap)histWrap.classList.add('sensitive-hidden');
-  const fab=$('fabBtn');
-  if(fab)fab.style.display='none';
-  if(HIDE_MODE_NAV_PAGES.includes(currentPage))goPage('home');
+  document.querySelectorAll('.sensitive-hidden').forEach(el=>el.classList.remove('sensitive-hidden'));
   updateBottomNavForHideMode();
   updateRismaFabVisibility();
 });
@@ -1835,37 +1748,32 @@ function createServerSupabaseFirestoreCompat(){
 
 function isSupabaseConfigured(){return SUPABASE_URL&&SUPABASE_ANON_KEY&&!SUPABASE_URL.includes('ISI_')&&!SUPABASE_ANON_KEY.includes('ISI_')}
 function initSupabase(){if(!isSupabaseConfigured()){showToast('Supabase belum disetting');return false}supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);return true}
-const HIDE_MODE_NAV_PAGES=['history','laporan','firebase'];
-const NORMAL_BOTTOM_NAV_ORDER=['home','history','laporan','firebase','staffDaily','risma'];
-const HIDE_BOTTOM_NAV_ORDER=['home','staffDaily','risma','history','laporan','firebase'];
-function isHiddenModeBlockedPage(p){return sensitiveHidden && HIDE_MODE_NAV_PAGES.includes(p)}
+const APP_PAGES=['home','staffDaily','risma'];
+const REMOVED_PAGES=['history','laporan','firebase'];
+function isHiddenModeBlockedPage(p){return false}
 function updateBottomNavForHideMode(){
   const bottomNav=$('bottomNav');
-  document.documentElement.classList.toggle('risma-hide-mode', !!sensitiveHidden);
-  const orderedPages=sensitiveHidden?HIDE_BOTTOM_NAV_ORDER:NORMAL_BOTTOM_NAV_ORDER;
-  let visibleCount=0;
-  orderedPages.forEach((page,idx)=>{
+  document.documentElement.classList.remove('risma-hide-mode');
+  APP_PAGES.forEach((page,idx)=>{
     const nav=$('nav-'+page);
     if(!nav)return;
-    const blocked=sensitiveHidden && HIDE_MODE_NAV_PAGES.includes(page);
-    if(blocked){
-      nav.style.setProperty('display','none','important');
-      nav.setAttribute('aria-hidden','true');
-    }else{
-      nav.style.removeProperty('display');
-      nav.removeAttribute('aria-hidden');
-    }
+    nav.style.removeProperty('display');
+    nav.removeAttribute('aria-hidden');
     nav.style.order=String(idx);
-    if(!blocked)visibleCount++;
   });
-  if(bottomNav)bottomNav.style.setProperty('grid-template-columns',`repeat(${visibleCount||1},1fr)`,'important');
+  REMOVED_PAGES.forEach(page=>{
+    const nav=$('nav-'+page);
+    if(nav){nav.style.setProperty('display','none','important');nav.setAttribute('aria-hidden','true');}
+    const pg=$('page'+page[0].toUpperCase()+page.slice(1));
+    if(pg)pg.classList.remove('active');
+  });
+  if(bottomNav)bottomNav.style.setProperty('grid-template-columns','repeat(3,1fr)','important');
 }
 function goPage(p){
   if(!RESTORABLE_PAGES.includes(p))p='home';
-  if(isHiddenModeBlockedPage(p))p='home';
   currentPage=p;
   try{localStorage.setItem(PAGE_KEY,p)}catch(e){};
-  ['home','history','laporan','firebase','risma','staffDaily'].forEach(x=>{
+  ['home','staffDaily','risma','history','laporan','firebase'].forEach(x=>{
     const pg=$('page'+x[0].toUpperCase()+x.slice(1));
     if(pg)pg.classList.toggle('active',x===p);
     const nav=$('nav-'+x);
@@ -2162,7 +2070,7 @@ async function ensureDefaultExpenseCategories(){
 }
 async function migrateLegacyExpensesToDefaultCategory(){
   const def=getDefaultExpenseCategory();if(!def)return;
-  const legacy=(transactions||[]).filter(t=>t.type==='expense'&&!isCashOut(t)&&!t.category_id&&!String(t.category_name||'').trim());
+  const legacy=(transactions||[]).filter(t=>isBusinessExpense(t)&&!t.category_id&&!String(t.category_name||'').trim());
   if(!legacy.length)return;
   try{
     const ids=legacy.map(t=>Number(t.id)).filter(Boolean);
@@ -2185,7 +2093,7 @@ function resetCategoryForm(){const id=$('categoryEditId'),inp=$('categoryNameInp
 function renderCategoryList(){
   const list=$('categoryList');if(!list)return;
   if(!expenseCategories.length){list.innerHTML='<div class="empty">Belum ada kategori. Jalankan SQL lalu tambah kategori.</div>';return;}
-  const counts={};(transactions||[]).forEach(t=>{if(t.type==='expense'&&!isCashOut(t)){const nm=getExpenseCategoryName(t);counts[nm]=(counts[nm]||0)+1}});
+  const counts={};(transactions||[]).forEach(t=>{if(isBusinessExpense(t)){const nm=getExpenseCategoryName(t);counts[nm]=(counts[nm]||0)+1}});
   list.innerHTML=(expenseCategories||[]).map(c=>{
     const isDefault=String(c.name).toLowerCase()===DEFAULT_CATEGORY_NAME.toLowerCase();
     const used=counts[c.name]||0;
@@ -2529,12 +2437,13 @@ function formatRupiah(n){return new Intl.NumberFormat('id-ID',{style:'currency',
 function getGrossIncomeForRange(mode,startDate,endDate){
   const today=getLocalDateString(), month=today.slice(0,7);
   if(mode==='today'){
-    // Pendapatan Hari Ini = Supabase hari ini + pemasukan manual - pengeluaran manual hari ini
+    // Pendapatan Hari Ini = Server Pusat hari ini + pemasukan manual - pengeluaran bisnis hari ini.
+    // Cash Out QRIS/Tabungan dan hutang tidak dihitung sebagai pengeluaran bisnis.
     const manualIncome=(transactions||[])
       .filter(t=>t.type==='income' && t.date===today && !isFirebaseUploaded(t))
       .reduce((sum,t)=>sum+Number(t.amount||0),0);
     const manualExpense=(transactions||[])
-      .filter(t=>t.type==='expense' && !isCashOut(t) && t.date===today)
+      .filter(t=>isBusinessExpense(t) && t.date===today)
       .reduce((sum,t)=>sum+Number(t.amount||0),0);
     return manualIncome + Number(todayFirebaseIncomeTotal||0) - manualExpense;
   }
@@ -2545,7 +2454,7 @@ function getGrossIncomeForRange(mode,startDate,endDate){
     return true; // all
   });
   const expenseRows=transactions.filter(t=>{
-    if(t.type!=='expense'||isCashOut(t))return false;
+    if(!isBusinessExpense(t))return false;
     if(mode==='month')return String(t.date||'').startsWith(month);
     if(mode==='range')return t.date>=(startDate||'') && t.date<=(endDate||'');
     return true; // all
@@ -2666,7 +2575,7 @@ function renderTodayFirebaseIncomeHome(){
   if(titleEl){titleEl.style.color=total<0?'var(--red)':'var(--green)';}
   if(infoEl){
     const parts=[];
-    if(fbTotal>0)parts.push(`Supabase ${formatRupiah(fbTotal)} (${fbCount} trx)`);
+    if(fbTotal>0)parts.push(`Server Pusat ${formatRupiah(fbTotal)} (${fbCount} trx)`);
     if(manualTotal>0)parts.push(`Manual ${formatRupiah(manualTotal)} (${manualRows.length} trx)`);
     if(opsTotal>0)parts.push(`Ops Toko -${formatRupiah(opsTotal)}`);
     infoEl.innerText=parts.length?parts.join(' · '):'Belum ada pendapatan hari ini';
@@ -2954,7 +2863,7 @@ function renderZakatSection(){
   if($('totalProfitDisplay'))$('totalProfitDisplay').innerText=formatRupiah(totalProfit);
   if($('totalZakatPaidProfit'))$('totalZakatPaidProfit').innerText=formatRupiah(paid);
   if($('unpaidProfitDisplay'))$('unpaidProfitDisplay').innerText=formatRupiah(unpaid);
-  if($('zakatBasisInfo'))$('zakatBasisInfo').innerText=`Zakat dihitung dari data final sampai ${cutoff} (H-1). Transaksi hari ini belum ikut dan akan masuk hitungan besok setelah Supabase sync/LOCK.`;
+  if($('zakatBasisInfo'))$('zakatBasisInfo').innerText=`Zakat dihitung dari data final sampai ${cutoff} (H-1). Transaksi hari ini belum ikut dan akan masuk hitungan besok setelah Server Pusat sync/LOCK.`;
   const pay=$('payZakatBtn'),zs=$('zakatPaymentStatusText');
   if(!pay||!zs)return;
   if(totalProfit<=0){zs.innerText=`Belum ada laba final sampai ${cutoff}`;pay.disabled=true;pay.style.opacity=.5}
@@ -2969,6 +2878,7 @@ function render(){
   updateNetSummary();
   renderTodayFirebaseIncomeHome();
   renderProfitSummary();
+  renderDebtSummary();
 
   // Ringkasan dashboard utama: semua data yang sudah masuk Supabase.
   // Ini yang membuat Saldo Bersih langsung berubah setelah upload omset Server Pusat.
@@ -2977,33 +2887,34 @@ function render(){
   let totalIn=0,totalOut=0,todayOut=0,monthOut=0;
   dashboardRows.forEach(t=>{
     if(t.type==='income')totalIn+=Number(t.amount||0);
-    else if(!isCashOut(t)){
-      // cashout (QRIS/Tabungan) hanya kurangi cash fisik, bukan pengeluaran bisnis
+    else if(isBusinessExpense(t)){
+      // Cashout (QRIS/Tabungan) hanya kurangi cash fisik, bukan pengeluaran bisnis.
+      // Hutang juga netral untuk laba/zakat, hanya masuk mutasi Saldo Bersih.
       totalOut+=Number(t.amount||0);
       if(t.date===today)todayOut+=Number(t.amount||0);
       if(String(t.date||'').startsWith(thisMonth))monthOut+=Number(t.amount||0);
     }
   });
-  // Tambah Supabase hari ini ke totalIn jika belum di-sync (agar autoProfit & saldo realtime)
+  // Tambah Server Pusat hari ini ke totalIn jika belum di-sync (agar autoProfit & saldo realtime)
   const fbTodayVal=Number(todayFirebaseIncomeTotal||0);
   const uploadedTodayCheck=getUploadedFirebaseTransaction(today);
   const totalInWithFirebase=totalIn+(fbTodayVal>0&&!uploadedTodayCheck?fbTodayVal:0);
+  const debtSummary=getDebtSummary(dashboardRows);
+  const debtBalance=debtSummary.borrowed-debtSummary.paid;
   const profit=totalInWithFirebase*.2;
-  const net=totalInWithFirebase-totalOut;
-  $('totalIncome').innerText=formatRupiah(totalInWithFirebase);
-  $('totalExpense').innerText=formatRupiah(todayOut);   // hero: hari ini
-  $('autoProfit').innerText=formatRupiah(profit);
-  $('netBalance').innerText=formatRupiah(net);
+  const net=totalInWithFirebase-totalOut+debtBalance;
+  if($('totalIncome'))$('totalIncome').innerText=formatRupiah(totalInWithFirebase);
+  if($('totalExpense'))$('totalExpense').innerText=formatRupiah(todayOut);   // hero: hari ini
+  if($('autoProfit'))$('autoProfit').innerText=formatRupiah(profit);
+  if($('netBalance'))$('netBalance').innerText=formatRupiah(net);
   // Card Sisa Operasional bawah disamakan dengan Ringkasan Laba.
-  // Sebelumnya card ini memakai semua data/kumulatif, sedangkan Ringkasan Laba memakai filter
-  // today/month/year/custom. Akibatnya angka sisa operasional bisa terlihat berbeda.
   const opDataForCard=getProfitSummaryData(currentProfitFilter);
   const opProfit=opDataForCard?Number(opDataForCard.laba||0):profit;
   const opSpent=opDataForCard?Number(opDataForCard.totalExpense||0):totalOut;
   const remainingOps=opProfit-opSpent;
-  $('spendingLimit').innerText=formatRupiah(todayOut);  // stat card home: hari ini
-  $('operationalUsed').innerText=formatRupiah(remainingOps);
-  $('operationalTotal').innerText=formatRupiah(opProfit);
+  if($('spendingLimit'))$('spendingLimit').innerText=formatRupiah(monthOut);  // stat card home: bulan ini (read only)
+  if($('operationalUsed'))$('operationalUsed').innerText=formatRupiah(remainingOps);
+  if($('operationalTotal'))$('operationalTotal').innerText=formatRupiah(opProfit);
   const spentEl=$('operationalSpent');if(spentEl)spentEl.innerText=formatRupiah(opSpent);
   // Riwayat: pengeluaran sesuai filter aktif + semua
   if($('expenseAllSummary'))$('expenseAllSummary').innerText=formatRupiah(totalOut);
@@ -3015,7 +2926,7 @@ function render(){
   } else if(currentFilter==='month'){
     filteredOut=monthOut; filteredLabel='Pengeluaran Bulan Ini';
   } else if(currentFilter==='range'){
-    filteredOut=dashboardRows.filter(t=>t.type==='expense'&&!isCashOut(t)&&t.date>=s2&&t.date<=e2).reduce((a,t)=>a+Number(t.amount||0),0);
+    filteredOut=dashboardRows.filter(t=>isBusinessExpense(t)&&t.date>=s2&&t.date<=e2).reduce((a,t)=>a+Number(t.amount||0),0);
     filteredLabel=s2&&e2?`Pengeluaran ${s2.slice(5)} s.d ${e2.slice(5)}`:'Pengeluaran Custom';
   } else {
     filteredOut=totalOut; filteredLabel='Total Semua Pengeluaran';
@@ -3026,38 +2937,41 @@ function render(){
   renderZakatSection();
 
   const over=opSpent>opProfit&&opProfit>0;
-  $('operationalCard').className='card '+(over?'danger-card':'safe-card');
-  $('limitWarning').innerText=over?'Over budget: pengeluaran lebih dari 20% omset periode ini':'';
-  $('statusText').innerText=over?'Bahaya':'Aman';
-  $('statusBadge').style.background=over?'#fff0ee':'#e9f7ef';
-  $('statusBadge').style.color=over?'#c0392b':'#176b43';
+  const opCard=$('operationalCard');
+  if(opCard)opCard.className='card '+(over?'danger-card':'safe-card');
+  if($('limitWarning'))$('limitWarning').innerText=over?'Over budget: pengeluaran lebih dari 20% omset periode ini':'';
+  if($('statusText'))$('statusText').innerText=over?'Bahaya':'Aman';
+  if($('statusBadge')){$('statusBadge').style.background=over?'#fff0ee':'#e9f7ef';$('statusBadge').style.color=over?'#c0392b':'#176b43';}
 
   // List Riwayat tetap mengikuti filter yang sedang dipilih.
   const f=getFilteredTransactions();
   const periodIncome=f.reduce((sum,t)=>t.type==='income'?sum+Number(t.amount||0):sum,0);
-  // cashout (QRIS/Tabungan) tidak dihitung sebagai pengeluaran di summary
+  const debtPeriod=getDebtSummary(f);
+  // cashout (QRIS/Tabungan) dan hutang tidak dihitung sebagai pengeluaran bisnis di summary
   const list=$('transactionList');
   if(!list){renderFirebaseUploadCard();renderFinanceReport();return}
   if(!f.length){list.innerHTML='<div class="empty">Belum ada transaksi</div>';renderFirebaseUploadCard();renderFinanceReport();return}
-  const periodExpenseReal=f.filter(t=>t.type==='expense'&&!isCashOut(t)).reduce((sum,t)=>sum+Number(t.amount||0),0);
-  $('currentPeriodLabel').innerText=`${getPeriodLabel()} · ${formatRupiah(periodIncome-periodExpenseReal)}`;
+  const periodExpenseReal=f.filter(isBusinessExpense).reduce((sum,t)=>sum+Number(t.amount||0),0);
+  if($('currentPeriodLabel'))$('currentPeriodLabel').innerText=`${getPeriodLabel()} · ${formatRupiah(periodIncome-periodExpenseReal+(debtPeriod.borrowed-debtPeriod.paid))}`;
   list.innerHTML=f.slice(0,80).map(t=>{
     const co=isCashOut(t);
+    const debt=isDebtTx(t);
     const tp=co?getCashOutType(t):'';
     const coLabel={qris:'QRIS',tabungan:'Tabungan',lainnya:'Lainnya'}[tp]||'';
-    const icon=co?'💳':(t.type==='income'?'+':'-');
-    const iconClass=co?'in':(t.type==='income'?'in':'out');
-    const iconStyle=co?'background:#e0f2fe;color:#0369a1':'';
-    const desc=co?cleanCashOutDesc(t.description)||coLabel:cleanFirebaseDesc(t.description);
-    const amtColor=co?'#0369a1':(t.type==='income'?'var(--green)':'var(--red)');
-    const amtPrefix=co?'':'';
-    const amtSign=t.type==='income'?'+':'-';
+    const debtLabel=isDebtIn(t)?'Pinjam Uang':(isDebtPay(t)?'Bayar Hutang':'');
+    const icon=co?'💳':(debt?'H':(t.type==='income'?'+':'-'));
+    const iconClass=(co||isDebtIn(t)||t.type==='income')?'in':'out';
+    const iconStyle=co?'background:#e0f2fe;color:#0369a1':(debt?'background:#fffbeb;color:#92400e':'');
+    const desc=co?cleanCashOutDesc(t.description)||coLabel:(debt?cleanDebtDesc(t.description):cleanFirebaseDesc(t.description));
+    const catLine=t.type==='expense'&&!co?getCategoryChipHtml(t):(debt?`<span class="category-chip" style="background:#fef3c7;color:#92400e">${debtLabel}</span>`:'');
+    const amtColor=co?'#0369a1':(isDebtIn(t)?'#92400e':(isDebtPay(t)?'#15803d':(t.type==='income'?'var(--green)':'var(--red)')));
+    const amtSign=(t.type==='income'||isDebtIn(t))?'+':'-';
     const badge=co?`<span class="cashout-badge ${tp}" style="font-size:9px;margin-left:4px">${coLabel}</span>`:
-      (isFirebaseUploaded(t)?'<span class="lock-badge">SERVER LOCK</span>':'');
+      (debt?`<span class="cashout-badge tabungan" style="font-size:9px;margin-left:4px;background:#fef3c7;color:#92400e">${debtLabel}</span>`:(isFirebaseUploaded(t)?'<span class="lock-badge">SERVER LOCK</span>':''));
     const ctrl=co
       ? `<div class="small" style="color:#0369a1;font-weight:900;font-size:9px">CASH PINDAH</div>`
-      : (isFirebaseUploaded(t)?`<div class="small blue" style="font-weight:900">${t.__firebasePreview?'PREVIEW':'LOCK'}</div>`:`<button class="x" onclick="deleteTransaction(${t.id})">×</button>`);
-    return `<div class="item" style="${co?'background:#f0f9ff;border-color:#bfdbfe':''}"><div class="left"><div class="icon ${iconClass}" style="${iconStyle}">${icon}</div><div class="desc"><b>${escapeHtml(desc)}${badge}</b><small>${t.date}</small>${t.type==='expense'&&!co?getCategoryChipHtml(t):''}</div></div><div class="right"><b class="num" style="color:${amtColor}">${amtSign}${formatRupiah(t.amount).replace('Rp','')}</b>${ctrl}</div></div>`;
+      : (debt?`<div class="small" style="color:#92400e;font-weight:900;font-size:9px">NETRAL</div>`:(isFirebaseUploaded(t)?`<div class="small blue" style="font-weight:900">${t.__firebasePreview?'PREVIEW':'LOCK'}</div>`:`<button class="x" onclick="deleteTransaction(${t.id})">×</button>`));
+    return `<div class="item" style="${co?'background:#f0f9ff;border-color:#bfdbfe':(debt?'background:#fffbeb;border-color:#fde68a':'')}"><div class="left"><div class="icon ${iconClass}" style="${iconStyle}">${icon}</div><div class="desc"><b>${escapeHtml(desc)}${badge}</b><small>${t.date}</small>${catLine}</div></div><div class="right"><b class="num" style="color:${amtColor}">${amtSign}${formatRupiah(t.amount).replace('Rp','')}</b>${ctrl}</div></div>`;
   }).join('')+(f.length>80?`<div class="empty">Ditampilkan 80 dari ${f.length} data biar ringan</div>`:'');
   renderFirebaseUploadCard();
   renderFinanceReport();
@@ -3154,6 +3068,47 @@ function showToast(message,duration=2600){const old=document.querySelector('.toa
 // Mengurangi "Pendapatan Hari Ini" di Home, tapi
 // tetap dihitung sebagai pengeluaran biasa di Riwayat.
 // =====================================================
+
+// =====================================================
+// LOGIKA HOME MENGIKUTI KAST: HUTANG NETRAL LABA/ZAKAT
+// Pinjaman dan bayar pokok hanya memengaruhi Saldo Bersih.
+// Tidak masuk pendapatan, pengeluaran bisnis, laba, atau zakat.
+// =====================================================
+const DEBT_IN_TYPE='debt_in';
+const DEBT_PAY_TYPE='debt_pay';
+const DEBT_IN_PREFIX='[HUTANG:PINJAM] ';
+const DEBT_PAY_PREFIX='[HUTANG:BAYAR] ';
+function isDebtIn(t){return t&&t.type===DEBT_IN_TYPE}
+function isDebtPay(t){return t&&t.type===DEBT_PAY_TYPE}
+function isDebtTx(t){return isDebtIn(t)||isDebtPay(t)}
+function isBusinessExpense(t){return t&&t.type==='expense'&&!isCashOut(t)}
+function cleanDebtDesc(desc){return String(desc||'').replace(/^\[HUTANG:(?:PINJAM|BAYAR)\]\s*/,'')}
+function getDebtSummary(rows=transactions){
+  const today=getLocalDateString();
+  const debtRows=(rows||[]).filter(isDebtTx);
+  const borrowed=debtRows.filter(isDebtIn).reduce((s,t)=>s+Number(t.amount||0),0);
+  const paid=debtRows.filter(isDebtPay).reduce((s,t)=>s+Number(t.amount||0),0);
+  const todayBorrowed=debtRows.filter(t=>isDebtIn(t)&&t.date===today).reduce((s,t)=>s+Number(t.amount||0),0);
+  const todayPaid=debtRows.filter(t=>isDebtPay(t)&&t.date===today).reduce((s,t)=>s+Number(t.amount||0),0);
+  return {rows:debtRows,borrowed,paid,active:Math.max(0,borrowed-paid),todayBorrowed,todayPaid,todayNet:todayBorrowed-todayPaid};
+}
+function renderDebtSummary(){
+  const s=getDebtSummary();
+  const setText=(id,val)=>{const el=$(id);if(el)el.innerText=formatRupiah(val)};
+  setText('debtActiveTotal',s.active);
+  setText('debtCardUnpaid',s.active);
+  setText('debtTotalBorrowed',s.borrowed);
+  setText('debtTotalPaid',s.paid);
+  setText('debtTotalUnpaid',s.active);
+  setText('debtModalActiveTotal',s.active);
+  setText('debtModalBorrowed',s.borrowed);
+  setText('debtModalPaid',s.paid);
+  const cardStatus=$('debtCardStatus');
+  if(cardStatus){cardStatus.innerText=s.active>0?'Belum Lunas':'Lunas';cardStatus.style.color=s.active>0?'#c2410c':'#15803d'}
+  const info=$('debtTodayInfo');
+  if(info)info.innerText=s.active>0?`Belum dibayar: ${formatRupiah(s.active)}`:'Hutang lunas';
+}
+
 const OPS_PREFIX='[OPS] ';
 function isOpsExpense(t){return t&&t.type==='expense'&&String(t.description||'').startsWith(OPS_PREFIX)}
 function handleOpsAmountPreview(input){$('opsAmountPreview').innerText=input.value?formatRupiah(getActualAmount(input.value)):''}
@@ -3322,32 +3277,28 @@ function getTodayCashOutTotals(){
 
 function renderCashFisik(){
   const today=getLocalDateString();
-  // Manual income tetap tercatat untuk laporan/laba, tapi tidak dihitung sebagai cash fisik hari ini.
+  // Manual income tetap tercatat untuk laporan/laba/zakat, tapi tidak dihitung sebagai cash fisik hari ini.
   const manualIncome=(transactions||[]).filter(t=>t.type==='income'&&t.date===today&&!isFirebaseUploaded(t)).reduce((s,t)=>s+Number(t.amount||0),0);
   const fbTotal=Number(todayFirebaseIncomeTotal||0);
   const opsTotal=(transactions||[]).filter(t=>isOpsExpense(t)&&t.date===today).reduce((s,t)=>s+Number(t.amount||0),0);
   const co=getTodayCashOutTotals();
-  // Cash fisik hari ini hanya dari omset Server Pusat/kasir, dikurangi Ops Toko, QRIS, dan Tabungan.
+  // Cash fisik hari ini khusus omset kasir hari ini, tidak termasuk hutang.
   const cashFisik=fbTotal-opsTotal-co.total;
-  // Update home card gabungan
   const cfEl=$('cashFisikTotal');
   if(cfEl){cfEl.innerText=formatRupiah(cashFisik<0?0:cashFisik);cfEl.style.color=cashFisik<0?'var(--red)':'#2563eb';}
-  // Update info text dengan breakdown sumber cash fisik
   const infoEl=$('todayFirebaseIncomeInfo');
   if(infoEl){
     const parts=[];
-    if(fbTotal>0)parts.push(`Supabase ${formatRupiah(fbTotal)}`);
+    if(fbTotal>0)parts.push(`Server Pusat ${formatRupiah(fbTotal)}`);
     if(opsTotal>0)parts.push(`Ops -${formatRupiah(opsTotal)}`);
     if(co.qris>0)parts.push(`QRIS -${formatRupiah(co.qris)}`);
     if(co.tabungan>0)parts.push(`Tabungan -${formatRupiah(co.tabungan)}`);
     if(manualIncome>0)parts.push(`Manual ${formatRupiah(manualIncome)} tidak masuk cash`);
-    infoEl.innerText=parts.length?parts.join(' · '):'Server Pusat - Ops Toko - QRIS - Tabungan · Manual tidak masuk cash fisik';
+    infoEl.innerText=parts.length?parts.join(' · '):'Server Pusat - Ops Toko - QRIS - Tabungan · Hutang masuk Saldo Bersih';
   }
-  // Update ops total di breakdown
   const opsTodayHomeEl=$('opsTodayHomeTotal');if(opsTodayHomeEl)opsTodayHomeEl.innerText=formatRupiah(opsTotal);
   const qEl=$('cashOutQrisTotal');if(qEl)qEl.innerText=formatRupiah(co.qris);
   const tEl=$('cashOutTabunganTotal');if(tEl)tEl.innerText=formatRupiah(co.tabungan);
-  // Update modal ringkasan
   const mf=$('cashOutModalFisikTotal');if(mf){mf.innerText=formatRupiah(cashFisik<0?0:cashFisik);mf.style.color=cashFisik<0?'var(--red)':'#1d4ed8';}
   const mq=$('cashOutModalQris');if(mq)mq.innerText=formatRupiah(co.qris);
   const mt=$('cashOutModalTabungan');if(mt)mt.innerText=formatRupiah(co.tabungan);
@@ -3378,26 +3329,25 @@ function getProfitSummaryData(filter){
   const thisYear=today.slice(0,4);
   const s=$('psStartDate')?$('psStartDate').value:'';
   const e=$('psEndDate')?$('psEndDate').value:'';
-  // Pendapatan: dari Supabase (manual + Supabase lock) + todayFirebase kalau filter today/month/year/custom mencakup hari ini
+  // Pendapatan: dari Supabase (manual + Server Pusat lock) + todayFirebase kalau filter mencakup hari ini.
+  // Hutang dan Cash Out tidak masuk laba/operasional.
   let incomeRows=[], expenseRows=[];
   const allTx=getDashboardTransactions();
-  // Helper: expense bisnis = expense tapi BUKAN cashout (QRIS/Tabungan hanya kurangi cash fisik)
-  const isRealExpense=t=>t.type==='expense'&&!isCashOut(t);
   if(filter==='today'){
     incomeRows=allTx.filter(t=>t.type==='income'&&t.date===today);
-    expenseRows=allTx.filter(t=>isRealExpense(t)&&t.date===today);
+    expenseRows=allTx.filter(t=>isBusinessExpense(t)&&t.date===today);
   } else if(filter==='month'){
     incomeRows=allTx.filter(t=>t.type==='income'&&String(t.date||'').startsWith(thisMonth));
-    expenseRows=allTx.filter(t=>isRealExpense(t)&&String(t.date||'').startsWith(thisMonth));
+    expenseRows=allTx.filter(t=>isBusinessExpense(t)&&String(t.date||'').startsWith(thisMonth));
   } else if(filter==='year'){
     incomeRows=allTx.filter(t=>t.type==='income'&&String(t.date||'').startsWith(thisYear));
-    expenseRows=allTx.filter(t=>isRealExpense(t)&&String(t.date||'').startsWith(thisYear));
+    expenseRows=allTx.filter(t=>isBusinessExpense(t)&&String(t.date||'').startsWith(thisYear));
   } else { // custom
     if(!s||!e)return null;
     incomeRows=allTx.filter(t=>t.type==='income'&&t.date>=s&&t.date<=e);
-    expenseRows=allTx.filter(t=>isRealExpense(t)&&t.date>=s&&t.date<=e);
+    expenseRows=allTx.filter(t=>isBusinessExpense(t)&&t.date>=s&&t.date<=e);
   }
-  // Tambahkan Supabase hari ini jika mencakup hari ini dan belum ada di Supabase
+  // Tambahkan Server Pusat hari ini jika mencakup hari ini dan belum ada di Supabase.
   const fbToday=Number(todayFirebaseIncomeTotal||0);
   const uploadedTodayTx=getUploadedFirebaseTransaction(today);
   const todayCovered=(filter==='today')||(filter==='month'&&today.startsWith(thisMonth))||(filter==='year'&&today.startsWith(thisYear))||(filter==='custom'&&s&&e&&today>=s&&today<=e);
@@ -3430,7 +3380,7 @@ function renderProfitSummary(){
 }
 function showExpenseListTodayModal(){
   const today=getLocalDateString();
-  const expenses=getDashboardTransactions().filter(t=>t.type==='expense'&&!isCashOut(t)&&t.date===today);
+  const expenses=getDashboardTransactions().filter(t=>isBusinessExpense(t)&&t.date===today);
   expenses.sort((a,b)=>b.id-a.id);
   const total=expenses.reduce((sum,t)=>sum+Number(t.amount||0),0);
   $('expenseListTotal').innerText=formatRupiah(total);
@@ -3443,7 +3393,7 @@ function showExpenseListTodayModal(){
 function showExpenseListModalFiltered(){
   const today=getLocalDateString(), thisMonth=today.slice(0,7);
   const s=$('filterStartDate')?$('filterStartDate').value:'', e=$('filterEndDate')?$('filterEndDate').value:'';
-  let expenses=getDashboardTransactions().filter(t=>t.type==='expense'&&!isCashOut(t));
+  let expenses=getDashboardTransactions().filter(isBusinessExpense);
   let subtitle='';
   if(currentFilter==='today'){
     expenses=expenses.filter(t=>t.date===today);
@@ -3467,11 +3417,11 @@ function showExpenseListModalFiltered(){
   $('expenseListModal').classList.remove('hidden');
 }
 function showExpenseListModal(){
-  const expenses=getDashboardTransactions().filter(t=>t.type==='expense');
+  const expenses=getDashboardTransactions().filter(isBusinessExpense);
   expenses.sort((a,b)=>b.date.localeCompare(a.date)||(b.id-a.id));
   const total=expenses.reduce((s,t)=>s+Number(t.amount||0),0);
   $('expenseListTotal').innerText=formatRupiah(total);
-  $('expenseListSubtitle').innerText=expenses.length+' transaksi pengeluaran (semua data)';
+  $('expenseListSubtitle').innerText=expenses.length+' transaksi pengeluaran bisnis (semua data)';
   const c=$('expenseListContent');
   if(!expenses.length){c.innerHTML='<div class="empty">Belum ada pengeluaran</div>';}
   else{c.innerHTML=expenses.slice(0,100).map(t=>`<div class="item"><div class="left"><div class="icon out">-</div><div class="desc"><b>${escapeHtml(cleanFirebaseDesc(t.description))}${isFirebaseUploaded(t)?'<span class="lock-badge">SERVER LOCK</span>':''}</b><small>${t.date}</small>${getCategoryChipHtml(t)}</div></div><div class="right"><b class="num red">-${formatRupiah(t.amount).replace('Rp','')}</b></div></div>`).join('')+(expenses.length>100?`<div class="empty">Ditampilkan 100 dari ${expenses.length} data</div>`:'')}
@@ -4070,10 +4020,9 @@ function getRismaMonthlyClosingBonus(month=getLocalDateString().slice(0,7)){
 function updateRismaFabVisibility(){
   const rismaFab=$('rismaFabBtn');
   const mainFab=$('fabBtn');
-  const showRismaFab=currentPage==='risma' && sensitiveHidden;
-  const hideMainFab=sensitiveHidden || currentPage==='staffDaily';
+  const showRismaFab=currentPage==='risma';
   if(rismaFab)rismaFab.style.display=showRismaFab?'grid':'none';
-  if(mainFab)mainFab.style.display=hideMainFab?'none':'grid';
+  if(mainFab)mainFab.style.display='none';
 }
 function openRismaTransactionModal(){
   if(currentPage!=='risma')goPage('risma');
