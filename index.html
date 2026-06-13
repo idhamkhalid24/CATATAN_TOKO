@@ -2306,6 +2306,20 @@ function getFirebaseRecordDateKey(t){
   return '';
 }
 function isFirebaseRecordDeleted(t){return t&&(t.deleted===true||t.deleted==='true'||t.isDeleted===true||t.isDeleted==='true'||t.canceled===true||t.canceled==='true'||t.cancelled===true||t.cancelled==='true'||t.status==='deleted'||t.status==='canceled'||t.status==='cancelled')}
+function isTruthyServerFlag(value){return value===true||value===1||String(value||'').toLowerCase()==='true'||String(value||'')==='1'}
+function isTrialServerRecord(t){
+  if(!t)return false;
+  const accountType=String(t.accountType||t.account_type||t.mode||'').toLowerCase();
+  return isTruthyServerFlag(t.isDummy)||
+    isTruthyServerFlag(t.is_dummy)||
+    isTruthyServerFlag(t.dummy)||
+    isTruthyServerFlag(t.trialMode)||
+    isTruthyServerFlag(t.trial_mode)||
+    isTruthyServerFlag(t.excludeFromReports)||
+    isTruthyServerFlag(t.exclude_from_reports)||
+    accountType==='dummy'||
+    accountType==='trial';
+}
 
 function getRecordDocKey(r){
   const key=r?._docId??r?.docId??r?.firebaseDocId??r?.messageId??r?.id;
@@ -2397,7 +2411,7 @@ function dedupeUsersRows(rows){
 function normalizeFirebaseRows(rows){
   return dedupeFirebaseRows((rows||[])
     .map(t=>({...t,dateKey:getFirebaseRecordDateKey(t),amount:Number(t.amount||0)}))
-    .filter(t=>t.dateKey&&!isFirebaseRecordDeleted(t)));
+    .filter(t=>t.dateKey&&!isFirebaseRecordDeleted(t)&&!isTrialServerRecord(t)));
 }
 function wibDayStartMs(date){return new Date(`${date}T00:00:00+07:00`).getTime()}
 function wibDayEndMs(date){return new Date(`${date}T23:59:59+07:00`).getTime()}
@@ -2410,7 +2424,7 @@ async function fetchFirebaseRowsByRange(start,end){
   try{addSnap(await firebaseDb.collection('transactions').where('timestamp','>=',wibDayStartMs(start)).where('timestamp','<=',wibDayEndMs(end)).get());}catch(e){console.warn('Query timestamp Supabase fallback dilewati:',e.message||e)}
   return normalizeFirebaseRows(Object.values(merged)).filter(t=>t.dateKey>=start&&t.dateKey<=end);
 }
-function sumFirebaseRows(rows){return dedupeFirebaseRows(rows||[]).reduce((a,b)=>a+Number(b.amount||0),0)}
+function sumFirebaseRows(rows){return normalizeFirebaseRows(rows||[]).reduce((a,b)=>a+Number(b.amount||0),0)}
 
 // === AUTO CASH OUT QRIS DARI SUPABASE KASIR ===
 // Transaksi kasir yang metode pembayarannya QRIS / Transfer tetap dihitung sebagai omset,
@@ -2479,7 +2493,7 @@ async function syncFirebaseQrisCashOut(rows,opts={}){
   const candidates=[];
   const seen=new Set();
   (rows||[]).forEach(t=>{
-    if(!t||isFirebaseRecordDeleted(t)||!isFirebaseQrisPayment(t))return;
+    if(!t||isFirebaseRecordDeleted(t)||isTrialServerRecord(t)||!isFirebaseQrisPayment(t))return;
     const amount=Number(t.amount||0);
     const date=t.dateKey||getFirebaseRecordDateKey(t);
     if(!date||!amount||amount<=0)return;
