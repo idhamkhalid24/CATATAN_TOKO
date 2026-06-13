@@ -4136,14 +4136,19 @@ function rismaProductTextFromItems(items,fallback='Transaksi'){
   const rows=(Array.isArray(items)?items:[]).map(x=>String(x||'').replace(/\s+/g,' ').trim()).filter(Boolean);
   return rows.length?rows.join('\n'):fallback;
 }
-function getRismaProductText(){return rismaProductTextFromItems(rismaProductItems,'Transaksi')}
+function getRismaProductText(){
+  const inputValue=String($('rismaProductInput')?.value||'').replace(/\s+/g,' ').trim();
+  const rows=[...rismaProductItems];
+  if(inputValue)rows.push(inputValue);
+  return rismaProductTextFromItems(rows,'Transaksi');
+}
 function renderRismaProductItems(){
   const input=$('rismaProductInput'),add=$('rismaProductAddBtn'),list=$('rismaProductList'),hidden=$('rismaDesc');
   if(add)add.disabled=!String(input?.value||'').trim();
   if(hidden)hidden.value=getRismaProductText();
   if(!list)return;
   if(!rismaProductItems.length){
-    list.innerHTML='<div class="risma-product-empty">Belum ada barang. Jika kosong, tersimpan sebagai Transaksi.</div>';
+    list.innerHTML='<div class="risma-product-empty">Ketik 1 barang boleh langsung Simpan. Tombol tambah hanya untuk barang berikutnya.</div>';
     return;
   }
   list.innerHTML=rismaProductItems.map((item,i)=>`<div class="risma-product-row"><span class="risma-product-no">${i+1}</span><span class="risma-product-name">${escapeHtml(item)}</span><button type="button" class="risma-product-remove" onclick="removeRismaProductItem(${i})">Hapus</button></div>`).join('');
