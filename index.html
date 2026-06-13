@@ -491,7 +491,7 @@
     }
     #pageRisma #rismaTodayList{
       max-height:38vh!important;
-      gap:6px!important;
+      gap:8px!important;
     }
     #pageRisma .item{
       padding:8px!important;
@@ -5410,19 +5410,25 @@ function renderRismaToday(){
     const ms=getRismaRecordTime(t);
     const waktu=ms?new Date(ms).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):'--:--';
     const payLabel=getRismaPaymentLabelFromRecord(t);
-    const payText=payLabel?` · ${payLabel}`:'';
     const itemCount=rismaProductItemsFromText(desc,'Transaksi').length;
-    return `<div class="item" style="align-items:center;padding:10px 12px">
-      <div class="left" style="min-width:0;flex:1">
-        <div class="icon in" style="background:#fce7f3;color:#be185d;width:34px;height:34px;flex:0 0 34px;border-radius:10px;font-size:15px">💰</div>
-        <div class="desc" style="min-width:0">
-          <div class="risma-product-desc" style="font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(getRismaDisplayName())} · ${waktu} · ${itemCount} item${payText}</div>
+    const payBadge=payLabel?`<span style="display:inline-block;background:#fce7f3;color:#be185d;font-size:9px;font-weight:900;padding:2px 6px;border-radius:999px;border:1px solid #fbcfe8;white-space:nowrap">${escapeHtml(payLabel)}</span>`:'';
+    return `<div style="background:white;border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">
+          <div style="background:#fce7f3;color:#be185d;width:32px;height:32px;flex:0 0 32px;border-radius:10px;font-size:15px;display:grid;place-items:center">💰</div>
+          <div style="min-width:0">
+            <div style="font-size:13px;font-weight:800;color:#be185d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">+${formatRupiah(t.amount).replace('Rp\u00a0','Rp ')}</div>
+            <div style="font-size:10px;color:var(--muted);font-weight:700;margin-top:1px">${escapeHtml(getRismaDisplayName())} · ${waktu}</div>
+          </div>
         </div>
+        <button onclick="deleteRismaTransaction('${t._docId}')" style="background:transparent;color:#d1d5d0;font-size:20px;padding:0 2px;border:none;cursor:pointer;line-height:1;flex-shrink:0">×</button>
       </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        <b class="num" style="color:#be185d;font-size:13px;white-space:nowrap">+${formatRupiah(t.amount).replace('Rp\u00a0','Rp ')}</b>
-        <button onclick="openRismaTransactionDetail('${t._docId}')" style="background:#fce7f3;color:#be185d;font-size:10px;font-weight:900;padding:5px 9px;border-radius:999px;border:none;cursor:pointer;white-space:nowrap">Detail</button>
-        <button onclick="deleteRismaTransaction('${t._docId}')" style="background:transparent;color:#d1d5d0;font-size:18px;padding:0 2px;border:none;cursor:pointer;line-height:1">×</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding-top:4px;border-top:1px solid var(--line)">
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-width:0">
+          <span style="font-size:10px;color:var(--muted);font-weight:700">${itemCount} item</span>
+          ${payBadge}
+        </div>
+        <button onclick="openRismaTransactionDetail('${t._docId}')" style="background:#fce7f3;color:#be185d;font-size:10px;font-weight:900;padding:5px 10px;border-radius:999px;border:none;cursor:pointer;white-space:nowrap;flex-shrink:0">Detail</button>
       </div>
     </div>`;
   }).join('');
