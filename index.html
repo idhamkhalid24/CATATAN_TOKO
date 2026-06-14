@@ -300,6 +300,7 @@
     .risma-staff-target-progress span{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#3b82f6,#16a34a);transition:width .35s ease}
     .risma-staff-target-percent{font-size:10.5px;font-weight:950;color:#7c3aed;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap}
     .risma-staff-target-line.reached .risma-staff-target-percent{color:#15803d}
+    .risma-staff-target-meta{grid-column:1/-1;font-size:9.5px;font-weight:850;color:var(--muted);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     @media(max-width:360px){.staff-summary-row{grid-template-columns:1fr;gap:7px}.staff-summary-right{text-align:left;padding-left:43px}.staff-summary-hero .value{font-size:22px}}
 
     /* === STAFF PAGE COMPACT ANDROID === */
@@ -1370,6 +1371,7 @@
       <div id="staffDailyTargetBar" class="risma-staff-target-line">
         <div class="risma-staff-target-progress"><span id="staffDailyTargetProgress"></span></div>
         <span id="staffDailyTargetPercent" class="risma-staff-target-percent">0%</span>
+        <div id="staffDailyTargetMeta" class="risma-staff-target-meta">Target memuat...</div>
       </div>
 
       <div class="grid2 staff-top-cards" style="margin-bottom:10px">
@@ -3810,6 +3812,7 @@ let staffDailyClosingRows=[];
 let staffDailySummaryLoaded={users:false,tx:false,manual:false,closing:false};
 let staffDailyTargetSettings=null;
 let staffDailyTargetSettingsLoaded=false;
+let staffDailyTargetSettingRows=[];
 let staffDailyTargetDoc=null;
 
 function normalizeRismaUsername(value){
@@ -4905,14 +4908,94 @@ function staffDailyTargetNumber(data,keys,fallback){
   }
   return fallback;
 }
-function normalizeStaffDailyTargetSettings(data={}){
+function normalizeStaffDailyTargetDateKey(value,fallback=getLocalDateString()){
+  const raw=String(value||'').trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(raw.slice(0,10)))return raw.slice(0,10);
+  let match=raw.match(/^(\d{1,2})$/);
+  if(match){
+    const day=Number(match[1]);
+    if(day>=1&&day<=31)return `${getLocalDateString().slice(0,7)}-${String(day).padStart(2,'0')}`;
+  }
+  match=raw.match(/^(\d{1,2})[\/-](\d{1,2})$/);
+  if(match){
+    const day=Number(match[1]),month=Number(match[2]);
+    if(day>=1&&day<=31&&month>=1&&month<=12)return `${getLocalDateString().slice(0,4)}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  }
+  return fallback;
+}
+function staffDailyTargetSettingDocId(dateKey=getLocalDateString()){
+  return `daily_target_${String(dateKey||getLocalDateString()).slice(0,10)}`;
+}
+function staffDailyTargetSettingDate(row={}){
+  const id=String(row.id||row._docId||'');
+  const idDate=id.match(/^daily_target_(\d{4}-\d{2}-\d{2})$/);
+  return normalizeStaffDailyTargetDateKey(row.effectiveDate||row.dateKey||row.startDate||row.targetDate||(idDate?idDate[1]:''),'');
+}
+function isStaffDailyTargetSettingRow(row={}){
+  const id=String(row.id||row._docId||'');
+  return id==='daily_target'||id==='__daily_target'||id==='default'||id.startsWith('daily_target_')||String(row.type||'')==='daily_target_setting'||String(row.targetSettingType||'')==='daily_target';
+}
+function normalizeStaffDailyTargetSettings(data={},fallbackDate=getLocalDateString()){
+  const activeDate=staffDailyTargetSettingDate(data)||normalizeStaffDailyTargetDateKey(fallbackDate,getLocalDateString());
   return{
+    id:String(data.id||data._docId||''),
+    dateKey:activeDate,
+    effectiveDate:activeDate,
     targetAmount:staffDailyTargetNumber(data,['targetAmount','dailyTargetAmount','dailyOmzetTarget','omzetTarget'],DEFAULT_STAFF_DAILY_TARGET_AMOUNT),
-    bonusAmount:staffDailyTargetNumber(data,['bonusAmount','bonusTargetAmount','dailyTargetBonusAmount','targetBonusAmount','BONUS_TARGET_AMOUNT'],DEFAULT_STAFF_DAILY_TARGET_BONUS)
+    bonusAmount:staffDailyTargetNumber(data,['bonusAmount','bonusTargetAmount','dailyTargetBonusAmount','targetBonusAmount','BONUS_TARGET_AMOUNT'],DEFAULT_STAFF_DAILY_TARGET_BONUS),
+    updatedAtMs:Number(data.updatedAtMs||0)
   };
 }
 function staffDailyTargetDocId(dateKey=getLocalDateString()){
-  return `daily_target_${String(dateKey||getLocalDateString()).slice(0,10)}`;
+  return staffDailyTargetSettingDocId(dateKey);
+}
+function pickStaffDailyTargetSettings(rows=[],dateKey=getLocalDateString()){
+  const targetDate=normalizeStaffDailyTargetDateKey(dateKey,getLocalDateString());
+  let best=null,bestDate='',bestUpdated=0;
+  (rows||[]).filter(isStaffDailyTargetSettingRow).forEach(row=>{
+    const rowDate=staffDailyTargetSettingDate(row);
+    if(rowDate&&rowDate>targetDate)return;
+    const scoreDate=rowDate||'0000-00-00';
+    const updated=Number(row.updatedAtMs||0);
+    if(!best||scoreDate>bestDate||(scoreDate===bestDate&&updated>=bestUpdated)){
+      best=row;
+      bestDate=scoreDate;
+      bestUpdated=updated;
+    }
+  });
+  return best?normalizeStaffDailyTargetSettings(best,targetDate):null;
+}
+async function loadStaffDailyTargetSettings(dateKey=getLocalDateString()){
+  if(!firebaseDb)return;
+  const targetDate=normalizeStaffDailyTargetDateKey(dateKey,getLocalDateString());
+  try{
+    const snap=await getFirebaseFreshSnapshot(firebaseDb.collection('targetSettings'));
+    const rows=snap.docs.map(d=>({...(d.data()||{}),_docId:d.id,id:d.id}));
+    staffDailyTargetSettingRows=rows.filter(isStaffDailyTargetSettingRow);
+    staffDailyTargetSettings=pickStaffDailyTargetSettings(staffDailyTargetSettingRows,targetDate);
+    staffDailyTargetSettingsLoaded=true;
+    return;
+  }catch(e){
+    console.warn('Load jadwal target staff gagal, coba dokumen lama:',e);
+  }
+  for(const id of ['daily_target','__daily_target','default']){
+    try{
+      const docSnap=await getFirebaseFreshSnapshot(firebaseDb.collection('targetSettings').doc(id));
+      if(docSnap.exists){
+        const data={id:docSnap.id,_docId:docSnap.id,...(docSnap.data()||{})};
+        staffDailyTargetSettingRows=[data];
+        const rowDate=staffDailyTargetSettingDate(data);
+        staffDailyTargetSettings=(!rowDate||rowDate<=targetDate)?normalizeStaffDailyTargetSettings(data,targetDate):null;
+        staffDailyTargetSettingsLoaded=true;
+        return;
+      }
+    }catch(e){
+      break;
+    }
+  }
+  staffDailyTargetSettingRows=[];
+  staffDailyTargetSettings=null;
+  staffDailyTargetSettingsLoaded=true;
 }
 function getStaffDailyTargetActiveSet(){
   const set=new Set();
@@ -4943,12 +5026,12 @@ function staffDailyTargetSummary(){
   const dateKey=getLocalDateString();
   const computedTotal=getStaffDailyTargetTotal(dateKey);
   const serverDoc=String(staffDailyTargetDoc?.dateKey||'').slice(0,10)===dateKey?staffDailyTargetDoc:null;
-  const settings=normalizeStaffDailyTargetSettings(staffDailyTargetSettingsLoaded?staffDailyTargetSettings:(serverDoc||{}));
+  const settings=normalizeStaffDailyTargetSettings(staffDailyTargetSettingsLoaded?(staffDailyTargetSettings||{}):(serverDoc||{}),dateKey);
   const targetAmount=Math.max(1,Number(settings.targetAmount||DEFAULT_STAFF_DAILY_TARGET_AMOUNT));
   const totalAmount=staffDailySummaryLoaded.tx?computedTotal:Number(serverDoc?.totalAmount||computedTotal||0);
   const rawPercent=(totalAmount/targetAmount)*100;
   const progressPercent=Number.isFinite(rawPercent)?Number(rawPercent.toFixed(2)):0;
-  return{dateKey,targetAmount,totalAmount,progressPercent,reached:totalAmount>=targetAmount,bonusAmount:Number(settings.bonusAmount||0)};
+  return{dateKey,targetSettingDate:settings.effectiveDate||settings.dateKey||dateKey,targetAmount,totalAmount,progressPercent,reached:totalAmount>=targetAmount,bonusAmount:Number(settings.bonusAmount||0)};
 }
 function renderStaffDailyTargetBar(){
   const bar=$('staffDailyTargetBar');
@@ -4959,9 +5042,12 @@ function renderStaffDailyTargetBar(){
   bar.classList.toggle('reached',!!summary.reached);
   const progress=$('staffDailyTargetProgress');
   const percent=$('staffDailyTargetPercent');
+  const meta=$('staffDailyTargetMeta');
   if(progress)progress.style.width=pct+'%';
   if(percent)percent.textContent=pctText+'%';
-  bar.setAttribute('aria-label',`Target hari ini ${pctText} persen`);
+  if(meta)meta.textContent=`Target ${formatRupiah(summary.targetAmount)} - Bonus ${formatRupiah(summary.bonusAmount)} - sejak ${summary.targetSettingDate}`;
+  bar.setAttribute('aria-label',`Target hari ini ${pctText} persen, target ${formatRupiah(summary.targetAmount)}, berlaku sejak ${summary.targetSettingDate}`);
+  bar.title=`Target ${formatRupiah(summary.targetAmount)} - Bonus ${formatRupiah(summary.bonusAmount)} - Berlaku sejak ${summary.targetSettingDate}`;
 }
 function getStaffDailyUserKeyFromRecord(record={}){
   return normalizeRismaUsername(record.user||record.username||record.createdBy||record.kasir||record._docId||record.id);
@@ -5173,13 +5259,15 @@ function startStaffDailySummaryWatch(){
     renderStaffDailySummary();
   });
   try{
-    const settingsUnsub=firebaseDb.collection('targetSettings').doc('daily_target').onSnapshot(docSnap=>{
-      staffDailyTargetSettingsLoaded=!!docSnap.exists;
-      staffDailyTargetSettings=docSnap.exists?normalizeStaffDailyTargetSettings(docSnap.data()||{}):null;
+    const settingsUnsub=firebaseDb.collection('targetSettings').onSnapshot(snap=>{
+      const rows=snap.docs.map(d=>({...(d.data()||{}),_docId:d.id,id:d.id}));
+      staffDailyTargetSettingRows=rows.filter(isStaffDailyTargetSettingRow);
+      staffDailyTargetSettings=pickStaffDailyTargetSettings(staffDailyTargetSettingRows,today);
+      staffDailyTargetSettingsLoaded=true;
       renderStaffDailyTargetBar();
-    },err=>{console.warn('Watch target staff gagal: setting',err);renderStaffDailyTargetBar();});
+    },err=>{console.warn('Watch target staff gagal: setting',err);loadStaffDailyTargetSettings(today).finally(()=>renderStaffDailyTargetBar());});
     staffDailySummaryUnsubs.push(settingsUnsub);
-  }catch(e){console.warn('Init watch target staff gagal: setting',e);renderStaffDailyTargetBar();}
+  }catch(e){console.warn('Init watch target staff gagal: setting',e);loadStaffDailyTargetSettings(today).finally(()=>renderStaffDailyTargetBar());}
   try{
     const targetUnsub=firebaseDb.collection('dailyTargets').doc(staffDailyTargetDocId(today)).onSnapshot(docSnap=>{
       staffDailyTargetDoc=docSnap.exists?{id:docSnap.id,_docId:docSnap.id,...(docSnap.data()||{})}:null;
@@ -5759,7 +5847,7 @@ async function refreshStaffDailyFirebaseDataOnce(){
   jobs.push(getFirebaseFreshSnapshot(firebaseDb.collection('transactions').where('dateKey','==',today)).then(snap=>{staffDailyTxRows=normalizeFirebaseRows(snap.docs.map(d=>({...(d.data()||{}),_docId:d.id,id:d.id})));staffDailySummaryLoaded.tx=true;}));
   jobs.push(getFirebaseFreshSnapshot(firebaseDb.collection('manualBonuses').where('monthKey','==',month)).then(snap=>{staffDailyManualRows=dedupeManualBonusRows(snap.docs.map(d=>({...(d.data()||{}),_docId:d.id,id:d.id}))).filter(b=>getStaffManualBonusDate(b)===today&&!isFirebaseRecordDeleted(b));staffDailySummaryLoaded.manual=true;}));
   jobs.push(getFirebaseFreshSnapshot(firebaseDb.collection('closings').where('dateKey','==',today)).then(snap=>{staffDailyClosingRows=dedupeClosingRows(snap.docs.map(d=>({...(d.data()||{}),_docId:d.id,id:d.id}))).filter(c=>c._docId!=='__bonus_settings'&&c.type!=='bonus_settings');staffDailySummaryLoaded.closing=true;}));
-  jobs.push(getFirebaseFreshSnapshot(firebaseDb.collection('targetSettings').doc('daily_target')).then(doc=>{staffDailyTargetSettingsLoaded=!!doc.exists;staffDailyTargetSettings=doc.exists?normalizeStaffDailyTargetSettings(doc.data()||{}):null;}));
+  jobs.push(getFirebaseFreshSnapshot(firebaseDb.collection('targetSettings')).then(snap=>{const rows=snap.docs.map(d=>({...(d.data()||{}),_docId:d.id,id:d.id}));staffDailyTargetSettingRows=rows.filter(isStaffDailyTargetSettingRow);staffDailyTargetSettings=pickStaffDailyTargetSettings(staffDailyTargetSettingRows,today);staffDailyTargetSettingsLoaded=true;}));
   jobs.push(getFirebaseFreshSnapshot(firebaseDb.collection('dailyTargets').doc(staffDailyTargetDocId(today))).then(doc=>{staffDailyTargetDoc=doc.exists?{id:doc.id,_docId:doc.id,...(doc.data()||{})}:null;}));
   await Promise.allSettled(jobs);
 }
