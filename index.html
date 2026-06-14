@@ -244,6 +244,9 @@
     .risma-product-empty{border:1px dashed #f9a8d4;background:#fff;color:var(--muted);border-radius:11px;padding:8px 9px;font-size:11px;line-height:1.35}
     .risma-product-render-list{margin:0;padding-left:17px;display:grid;gap:2px}
     .risma-product-render-list li{overflow-wrap:anywhere}
+    .risma-product-receipt-list{margin:8px 0 0;display:grid;gap:0;font-family:'Courier New',monospace;font-size:12px;line-height:1.45;white-space:pre-wrap;color:#111827;width:100%}
+    .risma-product-receipt-row{font-weight:800;overflow-wrap:anywhere}
+    .risma-product-receipt-sep{color:var(--muted);white-space:nowrap;overflow:hidden}
     .risma-product-desc{display:block;font-size:13px;font-weight:900;white-space:normal;overflow:visible;text-overflow:clip;line-height:1.28}
     .risma-payment-summary{background:#fff0f6;border:1px solid #f9a8d4;border-radius:16px;padding:12px;margin:10px 0 12px}
     .risma-payment-summary .rp-label{font-size:10px;font-weight:950;color:#be185d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
@@ -4151,7 +4154,7 @@ function renderRismaProductItems(){
     list.innerHTML='<div class="risma-product-empty">Ketik 1 barang boleh langsung Simpan. Tombol tambah hanya untuk barang berikutnya.</div>';
     return;
   }
-  list.innerHTML=rismaProductItems.map((item,i)=>`<div class="risma-product-row"><span class="risma-product-no">${i+1}</span><span class="risma-product-name">${escapeHtml(item)}</span><button type="button" class="risma-product-remove" onclick="removeRismaProductItem(${i})">Hapus</button></div>`).join('');
+  list.innerHTML=rismaProductItems.map((item,i)=>`<div class="risma-product-row"><span class="risma-product-no">&gt;</span><span class="risma-product-name">${escapeHtml(item)}</span><button type="button" class="risma-product-remove" onclick="removeRismaProductItem(${i})">Hapus</button></div>`).join('');
 }
 function resetRismaProductItems(note=''){
   const text=String(note||'').trim();
@@ -4183,11 +4186,17 @@ function handleRismaProductKey(e){
 function rismaProductDisplayHtml(note){
   const items=rismaProductItemsFromText(note,'Transaksi');
   if(items.length===1)return escapeHtml(items[0]);
-  return `<ol class="risma-product-render-list">${items.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ol>`;
+  return rismaProductReceiptHtml(items);
 }
 function rismaProductDetailHtml(note){
   const items=rismaProductItemsFromText(note,'Transaksi');
-  return `<ol class="risma-product-render-list">${items.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ol>`;
+  return rismaProductReceiptHtml(items);
+}
+function rismaProductReceiptHtml(items){
+  const rows=(Array.isArray(items)?items:[]).map(x=>String(x||'').trim()).filter(Boolean);
+  const safeRows=rows.length?rows:['Transaksi'];
+  const sep='-'.repeat(32);
+  return `<div class="risma-product-receipt-list">${safeRows.map(x=>`<div class="risma-product-receipt-row">${escapeHtml('> '+x)}</div><div class="risma-product-receipt-sep">${sep}</div>`).join('')}</div>`;
 }
 function closeRismaTransactionDetail(){
   const old=$('rismaTransactionDetailModal');
