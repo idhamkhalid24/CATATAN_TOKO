@@ -1340,10 +1340,6 @@
           </div>
           <span class="chip" style="background:#ffedd5;color:#c2410c;border-color:#fed7aa">FEE</span>
         </div>
-        <div class="grid2" style="margin-top:10px">
-          <div class="stat" style="box-shadow:none"><span>Omset Bulan Ini</span><b id="rismaMonthTotal" class="num" style="color:#be185d">Rp 0</b></div>
-          <div class="stat" style="box-shadow:none"><span>Transaksi Bulan Ini</span><b id="rismaMonthCount" class="num" style="color:#c2410c">0</b></div>
-        </div>
       </div>
 
       <!-- Form Input Penjualan dipindahkan ke FAB khusus Risma -->
@@ -3071,7 +3067,7 @@ function render(){
       (debt?`<span class="cashout-badge tabungan" style="font-size:9px;margin-left:4px;background:#fef3c7;color:#92400e">${debtLabel}</span>`:(isFirebaseUploaded(t)?'<span class="lock-badge">SERVER LOCK</span>':''));
     const ctrl=co
       ? `<div class="small" style="color:#0369a1;font-weight:900;font-size:9px">CASH PINDAH</div>`
-      : (debt?`<div class="small" style="color:#92400e;font-weight:900;font-size:9px">NETRAL</div>`:(isFirebaseUploaded(t)?`<div class="small blue" style="font-weight:900">${t.__firebasePreview?'PREVIEW':'LOCK'}</div>`:`<button class="x" onclick="deleteTransaction(${t.id})">×</button>`));
+      : (debt?`<div class="small" style="color:#92400e;font-weight:900;font-size:9px">NETRAL</div>`:(isFirebaseUploaded(t)?`<div class="small blue" style="font-weight:900">${t.__firebasePreview?'PREVIEW':'LOCK'}</div>`:`<button class="x" onclick="deleteTransaction(${t.id})" aria-label="Hapus transaksi" title="Hapus transaksi">🗑️</button>`));
     return `<div class="item" style="${co?'background:#f0f9ff;border-color:#bfdbfe':(debt?'background:#fffbeb;border-color:#fde68a':'')}"><div class="left"><div class="icon ${iconClass}" style="${iconStyle}">${icon}</div><div class="desc"><b>${escapeHtml(desc)}${badge}</b><small>${t.date}</small>${catLine}</div></div><div class="right"><b class="num" style="color:${amtColor}">${amtSign}${formatRupiah(t.amount).replace('Rp','')}</b>${ctrl}</div></div>`;
   }).join('')+(f.length>80?`<div class="empty">Ditampilkan 80 dari ${f.length} data biar ringan</div>`:'');
   renderFirebaseUploadCard();
@@ -3228,7 +3224,7 @@ function renderOpsTodayList(){
   const te=$('opsTodayTotal');if(te)te.innerText=formatRupiah(total);
   const list=$('opsTodayList');if(!list)return;
   if(!rows.length){list.innerHTML='<div class="empty">Belum ada operasional hari ini</div>';return;}
-  list.innerHTML=rows.map(t=>`<div class="ops-list-item"><div style="min-width:0;flex:1"><b style="font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(String(t.description||'').replace(OPS_PREFIX,''))}</b><small style="color:var(--muted)">${t.date}</small></div><b class="num red" style="font-size:13px;white-space:nowrap">-${formatRupiah(t.amount).replace('Rp','')}</b><button class="x" style="color:var(--red);font-size:18px;padding:4px 8px" onclick="deleteOpsExpenseWithPin(${t.id})">×</button></div>`).join('');
+  list.innerHTML=rows.map(t=>`<div class="ops-list-item"><div style="min-width:0;flex:1"><b style="font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(String(t.description||'').replace(OPS_PREFIX,''))}</b><small style="color:var(--muted)">${t.date}</small></div><b class="num red" style="font-size:13px;white-space:nowrap">-${formatRupiah(t.amount).replace('Rp','')}</b><button class="x" style="color:var(--red);font-size:18px;padding:4px 8px" onclick="deleteOpsExpenseWithPin(${t.id})" aria-label="Hapus operasional" title="Hapus operasional">🗑️</button></div>`).join('');
 }
 
 function deleteOpsExpenseWithPin(id){
@@ -3320,7 +3316,7 @@ function renderCashOutTodayList(){
     const locked=isAutoQrisCashOut(t);
     const action=locked
       ? `<span class="cashout-badge qris" style="background:#eef2ff;color:#1d4ed8;border:1px solid #bfdbfe;font-size:9px;white-space:nowrap">🔒 Staff</span>`
-      : `<button class="x" style="color:var(--red);font-size:18px;padding:4px 8px" onclick="deleteCashOutWithPin(${t.id})">×</button>`;
+      : `<button class="x" style="color:var(--red);font-size:18px;padding:4px 8px" onclick="deleteCashOutWithPin(${t.id})" aria-label="Hapus cash out" title="Hapus cash out">🗑️</button>`;
     const sub=locked?'QRIS otomatis · hapus dari aplikasi staff':t.date;
     return `<div class="cashout-list-item"><div style="min-width:0;flex:1;display:flex;align-items:center;gap:7px"><span class="cashout-badge ${tp}">${typeLabel[tp]||tp}</span><div style="min-width:0"><b style="font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(desc)}</b><span style="font-size:10px;color:var(--muted)">${escapeHtml(sub)}</span></div></div><b class="num" style="font-size:14px;color:#2563eb;white-space:nowrap">-${formatRupiah(t.amount).replace('Rp','')}</b>${action}</div>`;
   }).join('');
@@ -5442,7 +5438,7 @@ function renderRismaToday(){
             <div style="font-size:10px;color:var(--muted);font-weight:700;margin-top:1px">${escapeHtml(getRismaDisplayName())} · ${waktu}</div>
           </div>
         </div>
-        <button onclick="deleteRismaTransaction('${t._docId}')" style="background:transparent;color:#d1d5d0;font-size:20px;padding:0 2px;border:none;cursor:pointer;line-height:1;flex-shrink:0">×</button>
+        <button onclick="deleteRismaTransaction('${t._docId}')" aria-label="Hapus transaksi" title="Hapus transaksi" style="background:transparent;color:#d1d5d0;font-size:18px;padding:0 2px;border:none;cursor:pointer;line-height:1;flex-shrink:0">🗑️</button>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding-top:4px;border-top:1px solid var(--line)">
         <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-width:0">
