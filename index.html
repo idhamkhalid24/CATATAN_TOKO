@@ -4131,22 +4131,34 @@ function updateRismaFabVisibility(){
   if(mainFab)mainFab.style.display='none';
 }
 let rismaProductItems=[];
+function rismaProductName(value){
+  return String(value||'').replace(/\s+/g,' ').trim().toUpperCase();
+}
+function forceRismaUppercaseInput(el){
+  if(!el)return;
+  const oldValue=String(el.value||''),nextValue=oldValue.toUpperCase();
+  if(oldValue===nextValue)return;
+  const start=el.selectionStart,end=el.selectionEnd;
+  el.value=nextValue;
+  try{if(typeof start==='number'&&typeof end==='number')el.setSelectionRange(start,end)}catch(e){}
+}
 function rismaProductItemsFromText(text,fallback='Transaksi'){
-  const rows=String(text||'').split(/\r?\n/).map(x=>String(x||'').replace(/\s+/g,' ').trim()).filter(Boolean);
+  const rows=String(text||'').split(/\r?\n/).map(rismaProductName).filter(Boolean);
   return rows.length?rows:[fallback];
 }
 function rismaProductTextFromItems(items,fallback='Transaksi'){
-  const rows=(Array.isArray(items)?items:[]).map(x=>String(x||'').replace(/\s+/g,' ').trim()).filter(Boolean);
+  const rows=(Array.isArray(items)?items:[]).map(rismaProductName).filter(Boolean);
   return rows.length?rows.join('\n'):fallback;
 }
 function getRismaProductText(){
-  const inputValue=String($('rismaProductInput')?.value||'').replace(/\s+/g,' ').trim();
+  const inputValue=rismaProductName($('rismaProductInput')?.value||'');
   const rows=[...rismaProductItems];
   if(inputValue)rows.push(inputValue);
   return rismaProductTextFromItems(rows,'Transaksi');
 }
 function renderRismaProductItems(){
   const input=$('rismaProductInput'),add=$('rismaProductAddBtn'),list=$('rismaProductList'),hidden=$('rismaDesc');
+  forceRismaUppercaseInput(input);
   if(add)add.disabled=!String(input?.value||'').trim();
   if(hidden)hidden.value=getRismaProductText();
   if(!list)return;
@@ -4164,7 +4176,7 @@ function resetRismaProductItems(note=''){
 function updateRismaProductAddButton(){renderRismaProductItems()}
 function addRismaProductItem(){
   const input=$('rismaProductInput');
-  const value=String(input?.value||'').replace(/\s+/g,' ').trim();
+  const value=rismaProductName(input?.value||'');
   if(!value){renderRismaProductItems();input?.focus?.();return}
   rismaProductItems.push(value);
   if(input)input.value='';
