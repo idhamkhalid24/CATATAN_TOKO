@@ -1371,15 +1371,9 @@
       <div id="staffDailyTargetBar" class="risma-staff-target-line">
         <div class="risma-staff-target-progress"><span id="staffDailyTargetProgress"></span></div>
         <span id="staffDailyTargetPercent" class="risma-staff-target-percent">0%</span>
-        <div id="staffDailyTargetMeta" class="risma-staff-target-meta">Target memuat...</div>
       </div>
 
       <div class="grid2 staff-top-cards" style="margin-bottom:10px">
-        <div id="staffImportantCard" class="stat staff-bonus-card staff-important-card" style="border-color:#bbf7d0;background:linear-gradient(135deg,#ecfdf5,#fff7fb);box-shadow:none">
-          <span>📣 Penting</span>
-          <div id="staffSummaryImportantText" class="staff-important-text">Memuat catatan...</div>
-          <div id="staffSummaryImportantMeta" class="staff-important-meta">Menunggu update admin...</div>
-        </div>
         <div class="stat staff-victory-card" style="border-color:#ddd6fe;background:white;box-shadow:none">
           <span>Victory</span>
           <b id="staffSummaryTopSellerName" style="color:#7c3aed;font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">-</b>
@@ -5042,12 +5036,10 @@ function renderStaffDailyTargetBar(){
   bar.classList.toggle('reached',!!summary.reached);
   const progress=$('staffDailyTargetProgress');
   const percent=$('staffDailyTargetPercent');
-  const meta=$('staffDailyTargetMeta');
   if(progress)progress.style.width=pct+'%';
   if(percent)percent.textContent=pctText+'%';
-  if(meta)meta.textContent=`Target ${formatRupiah(summary.targetAmount)} - Bonus ${formatRupiah(summary.bonusAmount)} - sejak ${summary.targetSettingDate}`;
-  bar.setAttribute('aria-label',`Target hari ini ${pctText} persen, target ${formatRupiah(summary.targetAmount)}, berlaku sejak ${summary.targetSettingDate}`);
-  bar.title=`Target ${formatRupiah(summary.targetAmount)} - Bonus ${formatRupiah(summary.bonusAmount)} - Berlaku sejak ${summary.targetSettingDate}`;
+  bar.setAttribute('aria-label',`Target hari ini ${pctText} persen`);
+  bar.removeAttribute('title');
 }
 function getStaffDailyUserKeyFromRecord(record={}){
   return normalizeRismaUsername(record.user||record.username||record.createdBy||record.kasir||record._docId||record.id);
