@@ -928,6 +928,68 @@
     #bottomNav{grid-template-columns:repeat(3,1fr)!important}
 
 
+
+
+    /* === CASH FISIK TERBARU: Cek Laci + Selisih Kas (UI cash fisik saja) === */
+    .cash-fisik-card{
+      background:#eff6ff!important;
+      border:1.5px solid #bfdbfe!important;
+      border-radius:18px!important;
+      padding:11px 12px!important;
+      margin-bottom:10px!important;
+      box-shadow:var(--shadow)!important;
+      overflow:hidden!important;
+    }
+    .cash-fisik-header{
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) auto!important;
+      align-items:start!important;
+      gap:10px!important;
+      margin-bottom:0!important;
+    }
+    .cash-fisik-card.cash-fisik-expanded .cash-fisik-header{margin-bottom:8px!important}
+    .cash-fisik-main{min-width:0!important}
+    .cash-fisik-title{font-size:10px;font-weight:950;color:#2563eb;text-transform:uppercase;letter-spacing:.45px;margin:0 0 3px;line-height:1.1}
+    .cash-fisik-amount{font-size:24px;color:#2563eb;cursor:pointer;font-weight:950;line-height:1.08;letter-spacing:-.5px}
+    .cash-fisik-info{font-size:10.2px!important;color:#4b5563!important;line-height:1.35!important;font-weight:850!important;background:#f8fbff!important;border:1px solid #dbeafe!important;border-radius:12px!important;padding:7px 8px!important;word-break:break-word!important}
+    .cash-fisik-actions{display:grid!important;grid-template-columns:1fr!important;align-items:start!important;justify-content:end!important;gap:5px!important;min-width:max-content!important}
+    .cash-fisik-action-top{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:5px!important;width:100%!important}
+    .cash-fisik-badge,.cash-fisik-toggle{min-height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:8.8px;background:#dbeafe;color:#1d4ed8;border:2px solid #111;border-radius:999px;padding:3px 7px;font-weight:950;box-shadow:2px 2px 0 #111;line-height:1;white-space:nowrap}
+    .cash-fisik-toggle{background:#ffffff!important;color:#111827!important;cursor:pointer!important}
+    .cash-fisik-toggle:active{transform:translate(1px,1px)!important;box-shadow:1px 1px 0 #111!important}
+    .cash-fisik-btns{display:grid!important;grid-template-columns:repeat(3,max-content)!important;justify-content:end!important;gap:4px!important;width:100%!important}
+    .cash-fisik-btn-small{min-height:24px!important;padding:3px 7px!important;font-size:9px!important;line-height:1!important;border-radius:999px!important;font-weight:950!important;border:2px solid #111!important;box-shadow:2px 2px 0 #111!important;cursor:pointer!important;white-space:nowrap!important}
+    .cash-fisik-btn-small:active{transform:translate(1px,1px)!important;box-shadow:1px 1px 0 #111!important}
+    .cash-fisik-detail{display:grid!important;gap:7px!important;margin-top:8px!important;padding-top:8px!important;border-top:1px dashed #bfdbfe!important}
+    .cash-fisik-card.cash-fisik-collapsed .cash-fisik-detail{display:none!important}
+    .cash-fisik-breakdown{margin-top:0;padding-top:0;border:1px solid #dbeafe;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;background:white}
+    .breakdown-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 9px;border-bottom:1px solid #eef2ff}
+    .breakdown-row:last-child{border-bottom:0}
+    .breakdown-label{font-size:10px;color:var(--muted);font-weight:900}
+    .breakdown-val{font-size:12.5px;font-family:var(--mono, 'JetBrains Mono', monospace);font-weight:950;cursor:pointer;white-space:nowrap}
+    .cash-drawer-home{margin:0;padding:7px 8px;border:1px solid #dbeafe;background:#f8fbff;border-radius:13px;display:grid;gap:4px}
+    .cash-drawer-status{display:inline-flex;align-items:center;max-width:100%;width:max-content;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:950;border:1px solid #d1d5db;background:#f9fafb;color:#374151;line-height:1.2}
+    .cash-drawer-status.minus,.cash-drawer-preview.minus,.cash-drawer-list-item.minus{background:#fff1f2;border-color:#fecdd3;color:#be123c}
+    .cash-drawer-status.pas,.cash-drawer-preview.pas,.cash-drawer-list-item.pas{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
+    .cash-drawer-status.lebih,.cash-drawer-preview.lebih,.cash-drawer-list-item.lebih{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
+    .cash-drawer-status.empty,.cash-drawer-preview.empty{background:#f8fafc;border-color:#e5e7eb;color:var(--muted)}
+    .cash-drawer-note{margin-top:0;font-size:10px;color:var(--muted);font-weight:850;line-height:1.35}
+    .cash-drawer-summary{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:10px}
+    .cash-drawer-summary>div{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:13px}
+    .cash-drawer-summary span{font-size:10px;color:#2563eb;font-weight:900;text-transform:uppercase;letter-spacing:.3px}
+    .cash-drawer-summary b{font-size:13px;color:#2563eb;font-weight:950}
+    .cash-drawer-preview{border:1px solid #e5e7eb;border-radius:13px;padding:10px 12px;margin:-2px 0 12px;font-size:12px;font-weight:900;line-height:1.35}
+    .cash-drawer-actions{display:grid;grid-template-columns:.9fr 1fr 1.2fr;gap:8px;margin-top:4px}
+    .cash-drawer-actions .btn{min-width:0;padding-left:7px!important;padding-right:7px!important;font-size:12px!important;white-space:nowrap!important}
+    .cash-drawer-list-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid #e5e7eb;border-radius:13px;margin-bottom:7px}
+    .cash-drawer-list-item b{display:block;font-size:12px;font-weight:950}
+    .cash-drawer-list-item small{display:block;margin-top:2px;font-size:10px;color:inherit;opacity:.78;font-weight:850;line-height:1.35}
+    .cash-drawer-list-head{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .cash-drawer-active-badge{display:inline-flex;align-items:center;border-radius:999px;padding:2px 6px;background:#111827;color:white;font-size:8px;font-weight:950;letter-spacing:.3px}
+    .cash-drawer-row-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .cash-drawer-row-actions .mini-btn{min-width:auto;padding:5px 8px;font-size:10px}
+    @media(max-width:370px){.cash-fisik-header{grid-template-columns:1fr!important;gap:7px!important}.cash-fisik-actions{width:100%!important;min-width:0!important;justify-content:stretch!important}.cash-fisik-action-top{justify-content:space-between!important}.cash-fisik-btns{grid-template-columns:repeat(3,minmax(0,1fr))!important}.cash-fisik-btn-small{padding:3px 4px!important;font-size:8.5px!important}.cash-drawer-actions{grid-template-columns:1fr}.cash-drawer-list-item{align-items:flex-start;flex-direction:column}.cash-drawer-row-actions{width:100%;justify-content:flex-end}}
+
     /* === PATCH HOME CLEAN: sesuai request === */
     #fabBtn{display:none!important}
     .profit-summary-card,#zakatMalCard{display:none!important}
@@ -948,7 +1010,46 @@
       box-shadow:var(--shadow)!important;
     }
 
-</style>
+
+
+    /* === PATCH CASH FISIK: tombol aksi masuk ke detail + shortcut 3 tombol === */
+    .cash-fisik-actions{min-width:auto!important}
+    .cash-fisik-card.cash-fisik-collapsed .cash-fisik-actions{align-self:start!important}
+    .cash-fisik-detail-btns{
+      grid-template-columns:repeat(3,minmax(0,1fr))!important;
+      justify-content:stretch!important;
+      gap:7px!important;
+      margin:0 0 1px!important;
+    }
+    .cash-fisik-detail-btns .cash-fisik-btn-small{
+      width:100%!important;
+      min-height:30px!important;
+      font-size:10px!important;
+      padding:6px 7px!important;
+    }
+    #hiddenModeShortcuts.hidden-mode-shortcuts{
+      grid-template-columns:repeat(3,minmax(0,1fr))!important;
+      gap:7px!important;
+    }
+    #hiddenModeShortcuts .shortcut-btn{
+      min-height:46px!important;
+      padding:10px 7px!important;
+      font-size:11px!important;
+      line-height:1.15!important;
+    }
+    #hiddenModeShortcuts .shortcut-btn.laci{
+      background:#eef2ff!important;
+      color:#4338ca!important;
+      border:1px solid #c7d2fe!important;
+    }
+    @media(max-width:360px){
+      #hiddenModeShortcuts.hidden-mode-shortcuts{gap:5px!important}
+      #hiddenModeShortcuts .shortcut-btn{font-size:10px!important;padding:9px 4px!important;min-height:42px!important}
+      .cash-fisik-detail-btns{gap:5px!important}
+      .cash-fisik-detail-btns .cash-fisik-btn-small{font-size:9px!important;padding:5px 4px!important}
+    }
+
+  </style>
 </head>
 <body>
   <div id="passwordModal" class="modal hidden"><div class="box"><h3 style="margin:0 0 6px;text-align:center">Verifikasi PIN</h3><p class="small" style="text-align:center;margin-top:0">Masukkan PIN untuk hapus transaksi</p><input type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" id="confirmPasswordInput" placeholder="PIN" maxlength="8" style="text-align:center;font-size:24px;letter-spacing:6px"><div class="row" style="margin-top:10px"><button class="btn secondary" onclick="closePasswordModal()">Batal</button><button id="btnConfirmAction" class="btn">Lanjut</button></div></div></div>
@@ -1022,6 +1123,41 @@
     <button class="btn secondary" onclick="closeCashOutModal()" style="margin-top:12px;font-size:14px">Tutup</button>
   </div></div>
 
+
+
+  <!-- Modal Cek Laci Cash -->
+  <div id="cashDrawerAuditModal" class="modal hidden">
+    <div class="box" style="max-width:420px;width:100%">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:14px">
+        <div>
+          <h3 id="cashDrawerModalTitle" style="margin:0;font-size:18px">Cek Laci Cash</h3>
+          <small class="small" style="color:#2563eb;font-weight:800;display:block;margin-top:2px">Bandingkan cash aplikasi dengan uang nyata di laci. Selisih masuk kategori khusus.</small>
+        </div>
+        <button class="x" style="font-size:24px;padding:4px 8px" onclick="closeCashDrawerAuditModal()">×</button>
+      </div>
+
+      <div class="cash-drawer-summary">
+        <div><span>Patokan aplikasi</span><b id="cashDrawerExpectedAmount" class="num">Rp 0</b></div>
+        <div><span>Cash tampil sekarang</span><b id="cashDrawerBaseAmount" class="num">Rp 0</b></div>
+        <div><span>Selisih aktif</span><b id="cashDrawerCurrentAdjustment" class="num">Rp 0</b></div>
+      </div>
+
+      <div class="field amount-wrap">
+        <input type="number" min="0" inputmode="decimal" id="cashDrawerActualAmount" placeholder="Uang nyata di laci" oninput="handleCashDrawerActualPreview(this)">
+        <span id="cashDrawerActualPreview" class="preview"></span>
+      </div>
+      <div class="small" style="margin:-5px 0 10px;color:var(--muted);font-weight:800">Contoh: isi 80 untuk Rp 80.000.</div>
+      <div class="field"><input type="text" id="cashDrawerNote" placeholder="Catatan (opsional)"></div>
+      <div id="cashDrawerStatusPreview" class="cash-drawer-preview empty">Isi uang nyata di laci.</div>
+
+      <div class="cash-drawer-actions">
+        <button class="btn secondary" type="button" onclick="closeCashDrawerAuditModal()">Batal</button>
+        <button id="cashDrawerSaveBtn" class="btn" type="button" style="background:#2563eb" onclick="saveCashDrawerAudit(false)">Simpan</button>
+        <button id="cashDrawerNotifyBtn" class="btn" type="button" style="background:var(--green)" onclick="saveCashDrawerAudit(true)">Kirim Notif</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Pengeluaran Operasional Toko -->
   <div id="opsModal" class="modal hidden"><div class="box" style="max-width:400px;width:100%">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px">
@@ -1055,35 +1191,51 @@
 
     <section id="pageHome" class="page active sensitive-wrap">
 
-      <!-- Cash Fisik Card Gabungan (Ops Toko + QRIS + Tabungan) -->
-      <div class="card" style="margin-bottom:10px;background:#eff6ff;border-color:#bfdbfe">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-          <div style="min-width:0;flex:1">
-            <div class="section-title" style="margin:0 0 4px;color:#2563eb">Cash Fisik Hari Ini</div>
-            <div id="cashFisikTotal" class="num" style="font-size:26px;color:#2563eb;cursor:pointer" onclick="openCashOutModal()">Rp 0</div>
-            <div id="todayFirebaseIncomeInfo" class="small" style="color:#4b5563;margin-top:2px">Server Pusat - Ops Toko - QRIS - Tabungan · Manual tidak masuk cash fisik</div>
+      <!-- Cash Fisik Card Gabungan (Ops Toko + QRIS + Tabungan + Laci) -->
+      <div id="cashFisikCard" class="cash-fisik-card cash-fisik-collapsed">
+        <div class="cash-fisik-header">
+          <div class="cash-fisik-main">
+            <div class="cash-fisik-title">Cash Fisik Hari Ini</div>
+            <div id="cashFisikTotal" class="cash-fisik-amount num" onclick="openCashOutModal()">Rp 0</div>
           </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
-            <span class="lock-badge" style="margin-left:0;background:#dbeafe;color:#1d4ed8">HARI INI</span>
-            <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">
-              <button onclick="openOpsModal()" style="font-size:10px;padding:5px 9px;border-radius:999px;background:#fff3e0;color:#e8820c;font-weight:900;border:1px solid #ffd7a0;cursor:pointer;white-space:nowrap">Oprasional Toko</button>
-              <button onclick="openCashOutModal()" style="font-size:10px;padding:5px 9px;border-radius:999px;background:#dbeafe;color:#1d4ed8;font-weight:900;border:1px solid #93c5fd;cursor:pointer;white-space:nowrap">+ QRIS</button>
+          <div class="cash-fisik-actions">
+            <div class="cash-fisik-action-top">
+              <span class="cash-fisik-badge">HARI INI</span>
+              <button id="cashFisikToggleBtn" type="button" class="cash-fisik-toggle" aria-expanded="false" onclick="toggleCashFisikDetail()">Buka</button>
             </div>
           </div>
         </div>
-        <!-- Baris breakdown -->
-        <div style="margin-top:9px;padding-top:9px;border-top:1px solid #bfdbfe;display:flex;flex-direction:column;gap:5px">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:10px;color:var(--muted);font-weight:800">Operasional Toko</span>
-            <b id="opsTodayHomeTotal" class="num" style="font-size:13px;color:#e8820c;cursor:pointer" onclick="openOpsModal()">Rp 0</b>
+
+        <div id="cashFisikDetail" class="cash-fisik-detail" aria-hidden="true">
+          <div class="cash-fisik-btns cash-fisik-detail-btns">
+            <button onclick="openOpsModal()" class="cash-fisik-btn-small" style="background:#fff3e0;color:#e8820c;border-color:#111">+ Ops</button>
+            <button onclick="openCashOutModal()" class="cash-fisik-btn-small" style="background:#dbeafe;color:#1d4ed8;border-color:#111">+ QRIS</button>
+            <button onclick="openCashDrawerAuditModal()" class="cash-fisik-btn-small" style="background:#eef2ff;color:#4338ca;border-color:#111">Cek Laci</button>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:10px;color:var(--muted);font-weight:800">QRIS</span>
-            <b id="cashOutQrisTotal" class="num" style="font-size:13px;color:#2563eb;cursor:pointer" onclick="openCashOutModal()">Rp 0</b>
+          <div id="todayFirebaseIncomeInfo" class="cash-fisik-info small">Server Pusat - Ops Toko - QRIS - Tabungan - Laci</div>
+
+          <div class="cash-drawer-home">
+            <div id="cashDrawerStatusLine" class="cash-drawer-status empty">Belum dicek hari ini</div>
+            <div id="cashDrawerLatestNote" class="cash-drawer-note">Input uang nyata di laci untuk tahu minus, pas, atau lebih.</div>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:10px;color:var(--muted);font-weight:800">Tabungan</span>
-            <b id="cashOutTabunganTotal" class="num" style="font-size:13px;color:#854d0e;cursor:pointer" onclick="openCashOutModal()">Rp 0</b>
+
+          <div class="cash-fisik-breakdown">
+            <div class="breakdown-row">
+              <span class="breakdown-label">Operasional Toko</span>
+              <b id="opsTodayHomeTotal" class="breakdown-val num" style="color:#e8820c" onclick="openOpsModal()">Rp 0</b>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">QRIS</span>
+              <b id="cashOutQrisTotal" class="breakdown-val num" style="color:#2563eb" onclick="openCashOutModal()">Rp 0</b>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Tabungan</span>
+              <b id="cashOutTabunganTotal" class="breakdown-val num" style="color:#854d0e" onclick="openCashOutModal()">Rp 0</b>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Selisih Kas Laci</span>
+              <b id="cashDrawerAdjustmentTotal" class="breakdown-val num" style="color:var(--muted)" onclick="openCashDrawerAuditModal()">Rp 0</b>
+            </div>
           </div>
         </div>
       </div>
@@ -1125,7 +1277,8 @@
         <div id="zakatHistoryPreview" style="display:none"><div id="zakatHistoryMiniList"></div></div>
       </div>
       <div id="hiddenModeShortcuts" class="hidden-mode-shortcuts">
-        <button class="shortcut-btn ops" onclick="openOpsModal()">Oprasional Toko</button>
+        <button class="shortcut-btn ops" onclick="openOpsModal()">Operasional Toko</button>
+        <button class="shortcut-btn laci" onclick="openCashDrawerAuditModal()">Cek Laci</button>
         <button class="shortcut-btn qris" onclick="openCashOutModal()">+ QRIS</button>
       </div>
     </section>
@@ -1477,6 +1630,9 @@ const OWNER_ID='rocky-hijab'; const APP_PIN='170845';
 // Sama seperti index staff: transaksi Risma kirim notifikasi ke AdminLite lewat Cloudflare Worker.
 const ROCKY_NOTIFY_WORKER_BASE='https://rocky-notif-worker.alfajrihanif24.workers.dev';
 const ROCKY_NOTIFY_SECRET='rockyNotifRahasia2026';
+const CASH_DRAWER_TABLE='cash_drawer_audits';
+const ROCKY_STAFF_NOTIFY_CASH_DRAWER_URL=ROCKY_NOTIFY_WORKER_BASE+'/notify-cash-drawer-status';
+const ROCKY_STAFF_NOTIFY_SECRET=ROCKY_NOTIFY_SECRET;
 const PAGE_KEY='risma_finance_last_page_v1';
 const RESTORABLE_PAGES=['home','staffDaily','risma'];
 const FIREBASE_CONFIG={
@@ -1497,8 +1653,8 @@ const BELANJAKU_SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3Mi
 const BELANJAKU_SUPABASE_ITEMS_TABLE='belanja_items';
 
 function getSavedPage(){try{const p=localStorage.getItem(PAGE_KEY);return RESTORABLE_PAGES.includes(p)?p:'home'}catch(e){return 'home'}}
-let supabaseClient=null,transactions=[],zakatHistory=[],expenseCategories=[],currentFilter='today',currentFinanceReportFilter='month',pendingAction=null,currentPage=getSavedPage();
-let txSaveBusy=false, opsSaveBusy=false, cashOutSaveBusy=false;
+let supabaseClient=null,transactions=[],zakatHistory=[],expenseCategories=[],cashDrawerAudits=[],currentFilter='today',currentFinanceReportFilter='month',pendingAction=null,currentPage=getSavedPage();
+let txSaveBusy=false, opsSaveBusy=false, cashOutSaveBusy=false, cashDrawerTableReady=false, currentCashDrawerFilter='today', cashDrawerEditingId=null;
 // === RISMA SUCCESS SOUND ===
 // Suara dibuat langsung oleh Web Audio supaya HTML tetap satu file tanpa base64 besar.
 let rismaAudioCtx=null;
@@ -2220,6 +2376,7 @@ async function deleteCategory(id){
   }catch(e){showToast('Gagal hapus kategori: '+(e.message||e));}
 }
 function getExpenseCategoryName(t={}){
+  if(typeof isCashDrawerAdjustmentTx==='function'&&isCashDrawerAdjustmentTx(t))return t.type==='income'?CASH_DRAWER_PLUS_CATEGORY_NAME:CASH_DRAWER_MINUS_CATEGORY_NAME;
   if(isOpsExpense(t))return OPS_CATEGORY_NAME;
   if(isCashOut(t))return 'Cash Out';
   const byId=getCategoryById(t.category_id);if(byId)return byId.name;
@@ -2524,7 +2681,7 @@ function openPasswordModal(cb){pendingAction=cb;$('passwordModal').classList.rem
 async function addTransaction(){if(txSaveBusy)return;txSaveBusy=true;try{const dateVal=$('inputDate').value,type=$('type').value;let desc=$('description').value.trim();const amount=getActualAmount($('amount').value);let categoryPayload={};if(type==='income'&&!desc)desc='Omset';if(type==='expense'){if(!desc){showToast('Deskripsi pengeluaran wajib');return}const catId=$('expenseCategorySelect')?$('expenseCategorySelect').value:'';const cat=getCategoryById(catId);if(!cat){showToast('Kategori pengeluaran wajib dipilih');return}categoryPayload={category_id:Number(cat.id),category_name:cat.name};}if(!dateVal||amount<=0){showToast('Nominal tidak valid');return}await saveTransaction({id:Date.now(),date:dateVal,description:desc,amount,type,...categoryPayload});await loadTransactions();render();$('description').value='';$('amount').value='';$('liveAmountPreview').innerText='';$('inputDate').value=getLocalDateString();renderCategorySelects();closeTransactionModal();showToast('Transaksi tersimpan');goPage('home')}catch(e){showToast('Gagal simpan: '+e.message)}finally{txSaveBusy=false}}
 function onHistoryRangeChange(){$('filterStartDate').value=$('filterStartDateHistory').value;$('filterEndDate').value=$('filterEndDateHistory').value;render();}
 function changeFilter(f){currentFilter=f;$('rangeSelector').classList.toggle('hidden',f!=='range');const rh=$('rangeSelectorHistory');if(rh)rh.classList.toggle('hidden',f!=='range');if(f==='range'){const s=$('filterStartDateHistory'),e=$('filterEndDateHistory');if(s&&!s.value)s.value=getLocalDateString();if(e&&!e.value)e.value=getLocalDateString();$('filterStartDate').value=s?s.value:getLocalDateString();$('filterEndDate').value=e?e.value:getLocalDateString();}updateFilterUI();render();updateMonthValidityIdle()}function updateFilterUI(){['today','month','range','all'].forEach(f=>{const el=$('filter-'+f);if(el)el.classList.toggle('active',f===currentFilter)})}
-async function deleteTransaction(id){const t=transactions.find(x=>Number(x.id)===Number(id));if(t&&isAutoQrisCashOut(t)){showToast('QRIS otomatis tidak bisa dihapus di sini. Hapus transaksi aslinya dari aplikasi staff.');return}if(t&&isFirebaseUploaded(t)){showToast('Data SERVER LOCK. Gunakan tombol Sync di halaman Server Pusat, bukan hapus manual.');return}openPasswordModal(async()=>{try{await deleteTransactionFromDB(id);await loadTransactions();validateAndCancelInvalidZakat();render();showToast('Transaksi dihapus')}catch(e){showToast('Gagal hapus: '+e.message)}})}
+async function deleteTransaction(id){const t=transactions.find(x=>Number(x.id)===Number(id));if(t&&typeof isCashDrawerAdjustmentTx==='function'&&isCashDrawerAdjustmentTx(t)){showToast('Selisih Kas Laci dibuat otomatis. Edit/hapus dari Cek Laci Cash.');return}if(t&&isAutoQrisCashOut(t)){showToast('QRIS otomatis tidak bisa dihapus di sini. Hapus transaksi aslinya dari aplikasi staff.');return}if(t&&isFirebaseUploaded(t)){showToast('Data SERVER LOCK. Gunakan tombol Sync di halaman Server Pusat, bukan hapus manual.');return}openPasswordModal(async()=>{try{await deleteTransactionFromDB(id);await loadTransactions();validateAndCancelInvalidZakat();render();renderCashFisik();showToast('Transaksi dihapus')}catch(e){showToast('Gagal hapus: '+e.message)}})}
 async function requestClearAll(){openPasswordModal(async()=>{if(confirm('Hapus semua data manual? Data SERVER LOCK tidak akan dihapus.')){try{await clearManualTransactions();await saveZakatHistory([]);await loadTransactions();render();showToast('Data manual dihapus. SERVER LOCK tetap aman.')}catch(e){showToast('Gagal reset: '+e.message)}}})}
 function formatRupiah(n){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0,maximumFractionDigits:0}).format(roundRp(n))}function getActualAmount(raw){if(!raw||isNaN(raw))return 0;return parseFloat(raw)*1000}function handleSmartAmount(input){$('liveAmountPreview').innerText=input.value?formatRupiah(getActualAmount(input.value)):''}function updatePlaceholder(){const isExp=$('type').value==='expense';$('description').placeholder=isExp?'Contoh: Makan, listrik':'Omset (boleh kosong)';const cat=$('expenseCategoryField');if(cat)cat.classList.toggle('hidden',!isExp);if(isExp)renderCategorySelects()}
 function getGrossIncomeForRange(mode,startDate,endDate){
@@ -3368,33 +3525,217 @@ function getTodayCashOutTotals(){
   return {qris,tabungan,lainnya,total:qris+tabungan+lainnya};
 }
 
-function renderCashFisik(){
+// =====================================================
+// CEK LACI CASH
+// Audit khusus membandingkan cash aplikasi vs uang nyata laci.
+// Minus jadi Pengeluaran Selisih Kas, Lebih jadi Pemasukan Selisih Kas.
+// =====================================================
+const CASH_DRAWER_ADJ_PREFIX='[SELISIH_LACI:';
+const CASH_DRAWER_MINUS_CATEGORY_NAME='Selisih Kas Minus';
+const CASH_DRAWER_PLUS_CATEGORY_NAME='Selisih Kas Lebih';
+function isCashDrawerAdjustmentTx(t={}){
+  const desc=String(t&&t.description||'');
+  const cat=String(t&&t.category_name||'').toLowerCase();
+  return !!(t&&desc.startsWith(CASH_DRAWER_ADJ_PREFIX))
+    || cat===CASH_DRAWER_MINUS_CATEGORY_NAME.toLowerCase()
+    || cat===CASH_DRAWER_PLUS_CATEGORY_NAME.toLowerCase();
+}
+function getCashDrawerAdjustmentTxAuditId(t={}){
+  const m=String(t&&t.description||'').match(/^\[SELISIH_LACI:([^\]]+)\]/);
+  return m?String(m[1]):'';
+}
+function isCashDrawerAdjustmentTxForAudit(t={},auditId){return isCashDrawerAdjustmentTx(t)&&String(getCashDrawerAdjustmentTxAuditId(t))===String(auditId)}
+function cleanCashDrawerAdjustmentDesc(desc){return String(desc||'').replace(/^\[SELISIH_LACI:[^\]]+\]\s*/,'').trim()}
+function formatSignedRupiah(n){const x=roundRp(n);if(x>0)return '+'+formatRupiah(x);if(x<0)return '-'+formatRupiah(Math.abs(x));return formatRupiah(0)}
+function getCashDrawerAdjustmentTxAmountForDate(date){
+  const d=String(date||getLocalDateString()).slice(0,10);
+  const latest=getLatestCashDrawerAudit(d);if(!latest)return 0;
+  return roundRp((transactions||[]).filter(t=>String(t&&t.date||'').slice(0,10)===d&&isCashDrawerAdjustmentTxForAudit(t,latest.id)).reduce((sum,t)=>sum+(t.type==='income'?Number(t.amount||0):-Number(t.amount||0)),0));
+}
+function getCashDrawerLegacyAdjustmentForDate(date){
+  const d=String(date||getLocalDateString()).slice(0,10);
+  const latest=getLatestCashDrawerAudit(d);
+  if(!latest||latest.status==='pas'||roundRp(latest.adjustmentAmount)===0)return 0;
+  const hasTx=(transactions||[]).some(t=>String(t&&t.date||'').slice(0,10)===d&&isCashDrawerAdjustmentTxForAudit(t,latest.id));
+  return hasTx?0:roundRp(latest.adjustmentAmount);
+}
+function getCashDrawerAppliedAdjustmentForDate(date){const d=String(date||getLocalDateString()).slice(0,10);return roundRp(getCashDrawerAdjustmentTxAmountForDate(d)+getCashDrawerLegacyAdjustmentForDate(d))}
+async function getCashDrawerMinusCategory(){
+  try{
+    await loadExpenseCategories();
+    let cat=getCategoryByName(CASH_DRAWER_MINUS_CATEGORY_NAME);
+    if(!cat){try{await insertExpenseCategory(CASH_DRAWER_MINUS_CATEGORY_NAME,6)}catch(e){console.warn('Auto kategori Selisih Kas Minus gagal:',e)}await loadExpenseCategories();cat=getCategoryByName(CASH_DRAWER_MINUS_CATEGORY_NAME)}
+    return cat||{id:null,name:CASH_DRAWER_MINUS_CATEGORY_NAME};
+  }catch(e){console.warn('Kategori Selisih Kas Minus tidak siap:',e);return {id:null,name:CASH_DRAWER_MINUS_CATEGORY_NAME}}
+}
+function buildCashDrawerAdjustmentTransaction(audit){
+  const r=normalizeCashDrawerAudit(audit);
+  const amount=Math.abs(roundRp(r.differenceAmount));
+  if(!amount||r.status==='pas')return null;
+  const statusLabel=r.status==='minus'?CASH_DRAWER_MINUS_CATEGORY_NAME:CASH_DRAWER_PLUS_CATEGORY_NAME;
+  const word=r.status==='minus'?'kurang':'lebih';
+  const note=r.note?` · ${r.note}`:'';
+  return {id:Date.now()+Math.floor(Math.random()*999),date:r.dateKey,description:`${CASH_DRAWER_ADJ_PREFIX}${r.id}] ${statusLabel} - uang laci ${word} ${formatRupiah(amount)} · patokan ${formatRupiah(r.baseAmount)} · real ${formatRupiah(r.actualAmount)}${note}`,amount,type:r.status==='minus'?'expense':'income',category_id:null,category_name:statusLabel};
+}
+async function deleteCashDrawerAdjustmentTransactionsForDate(date){
+  if(!supabaseClient)return 0;
+  const d=String(date||getLocalDateString()).slice(0,10);
+  const {data,error}=await supabaseClient.from('transactions').select('id').eq('owner_id',OWNER_ID).eq('date',d).like('description',CASH_DRAWER_ADJ_PREFIX+'%');
+  if(error)throw error;
+  const ids=(data||[]).map(x=>Number(x.id)).filter(Boolean);
+  if(ids.length){const del=await supabaseClient.from('transactions').delete().eq('owner_id',OWNER_ID).in('id',ids);if(del.error)throw del.error;}
+  transactions=(transactions||[]).filter(t=>!ids.includes(Number(t.id)));
+  return ids.length;
+}
+async function syncCashDrawerAdjustmentTransactionForDate(date){
+  if(!supabaseClient)return null;
+  const d=String(date||getLocalDateString()).slice(0,10);
+  await deleteCashDrawerAdjustmentTransactionsForDate(d);
+  const latest=getLatestCashDrawerAudit(d);
+  if(!latest||latest.status==='pas'||roundRp(latest.differenceAmount)===0)return null;
+  const tx=buildCashDrawerAdjustmentTransaction(latest);if(!tx)return null;
+  if(tx.type==='expense'){const cat=await getCashDrawerMinusCategory();tx.category_id=cat&&cat.id?Number(cat.id):null;tx.category_name=CASH_DRAWER_MINUS_CATEGORY_NAME;}
+  await saveTransaction(tx);return tx;
+}
+function getCashDrawerStatus(diff){const n=roundRp(diff);if(n<0)return 'minus';if(n>0)return 'lebih';return 'pas'}
+function cashDrawerStatusLabel(status){return status==='minus'?'MINUS':(status==='lebih'?'LEBIH':'PAS')}
+function cashDrawerStatusClass(status){return status==='minus'?'minus':(status==='lebih'?'lebih':'pas')}
+function normalizeCashDrawerAudit(r={}){
+  const diff=roundRp(r.differenceAmount??r.difference_amount??0);
+  const status=String(r.status||getCashDrawerStatus(diff)).toLowerCase();
+  const dateKey=String(r.dateKey||r.date_key||r.date||getLocalDateString()).slice(0,10);
+  return {id:Number(r.id)||Date.now(),owner_id:r.owner_id||OWNER_ID,dateKey,baseAmount:roundRp(r.baseAmount??r.base_amount??0),expectedAmount:roundRp(r.expectedAmount??r.expected_amount??0),actualAmount:roundRp(r.actualAmount??r.actual_amount??0),differenceAmount:diff,previousAdjustmentAmount:roundRp(r.previousAdjustmentAmount??r.previous_adjustment_amount??0),adjustmentAmount:roundRp(r.adjustmentAmount??r.adjustment_amount??0),status:['minus','pas','lebih'].includes(status)?status:getCashDrawerStatus(diff),note:String(r.note||'').trim(),notifyStatus:String(r.notifyStatus||r.notify_status||'pending'),notifyResponse:r.notifyResponse||r.notify_response||null,createdAt:r.createdAt||r.created_at||new Date().toISOString(),updatedAt:r.updatedAt||r.updated_at||r.createdAt||r.created_at||new Date().toISOString()};
+}
+function cashDrawerAuditDbRow(row={}){const r=normalizeCashDrawerAudit(row);return {id:r.id,owner_id:OWNER_ID,date_key:r.dateKey,base_amount:r.baseAmount,expected_amount:r.expectedAmount,actual_amount:r.actualAmount,difference_amount:r.differenceAmount,previous_adjustment_amount:r.previousAdjustmentAmount,adjustment_amount:r.adjustmentAmount,status:r.status,note:r.note,notify_status:r.notifyStatus,notify_response:r.notifyResponse}}
+async function loadCashDrawerAudits(){
+  if(!supabaseClient){cashDrawerAudits=[];cashDrawerTableReady=false;return cashDrawerAudits}
+  const {data,error}=await supabaseClient.from(CASH_DRAWER_TABLE).select('*').eq('owner_id',OWNER_ID).order('date_key',{ascending:false}).order('created_at',{ascending:false}).limit(300);
+  if(error){cashDrawerAudits=[];cashDrawerTableReady=false;throw error}
+  cashDrawerTableReady=true;cashDrawerAudits=(data||[]).map(normalizeCashDrawerAudit);return cashDrawerAudits;
+}
+async function insertCashDrawerAudit(row){
+  if(!supabaseClient)throw new Error('Supabase belum aktif');
+  const {data,error}=await supabaseClient.from(CASH_DRAWER_TABLE).insert(cashDrawerAuditDbRow(row)).select('*').single();
+  if(error){cashDrawerTableReady=false;throw error}
+  cashDrawerTableReady=true;const saved=normalizeCashDrawerAudit(data||row);cashDrawerAudits=[saved,...(cashDrawerAudits||[]).filter(x=>Number(x.id)!==Number(saved.id))];return saved;
+}
+async function updateCashDrawerAuditRecord(id,row){
+  if(!supabaseClient)throw new Error('Supabase belum aktif');
+  const payload=cashDrawerAuditDbRow({...row,id:Number(id)});
+  const {data,error}=await supabaseClient.from(CASH_DRAWER_TABLE).update(payload).eq('owner_id',OWNER_ID).eq('id',Number(id)).select('*').single();
+  if(error)throw error;const saved=normalizeCashDrawerAudit(data||{...row,id:Number(id)});cashDrawerAudits=(cashDrawerAudits||[]).map(x=>Number(x.id)===Number(saved.id)?saved:x);return saved;
+}
+async function updateCashDrawerAuditNotify(audit,notifyStatus,notifyResponse){
+  const row=normalizeCashDrawerAudit({...audit,notifyStatus,notifyResponse});
+  cashDrawerAudits=(cashDrawerAudits||[]).map(x=>Number(x.id)===Number(row.id)?row:x);
+  if(!supabaseClient||!cashDrawerTableReady)return row;
+  const {error}=await supabaseClient.from(CASH_DRAWER_TABLE).update({notify_status:row.notifyStatus,notify_response:row.notifyResponse,updated_at:new Date().toISOString()}).eq('owner_id',OWNER_ID).eq('id',row.id);
+  if(error)console.warn('Update status notifikasi audit laci gagal:',error);return row;
+}
+function getCashDrawerAuditsForDate(date=getLocalDateString()){const d=String(date||getLocalDateString()).slice(0,10);return (cashDrawerAudits||[]).filter(r=>String(r.dateKey||'').slice(0,10)===d).sort((a,b)=>(Date.parse(b.createdAt||'')||Number(b.id)||0)-(Date.parse(a.createdAt||'')||Number(a.id)||0))}
+function getLatestCashDrawerAudit(date=getLocalDateString()){return getCashDrawerAuditsForDate(date)[0]||null}
+function findCashDrawerAudit(id){return (cashDrawerAudits||[]).find(r=>Number(r.id)===Number(id))||null}
+function getTodayCashFisikData(){
   const today=getLocalDateString();
-  // Manual income tetap tercatat untuk laporan/laba/zakat, tapi tidak dihitung sebagai cash fisik hari ini.
-  const manualIncome=(transactions||[]).filter(t=>t.type==='income'&&t.date===today&&!isFirebaseUploaded(t)).reduce((s,t)=>s+Number(t.amount||0),0);
+  const manualIncome=(transactions||[]).filter(t=>t.type==='income'&&t.date===today&&!isFirebaseUploaded(t)&&!isCashDrawerAdjustmentTx(t)).reduce((s,t)=>s+Number(t.amount||0),0);
   const fbTotal=Number(todayFirebaseIncomeTotal||0);
   const opsTotal=(transactions||[]).filter(t=>isOpsExpense(t)&&t.date===today).reduce((s,t)=>s+Number(t.amount||0),0);
   const co=getTodayCashOutTotals();
-  // Cash fisik hari ini khusus omset kasir hari ini, tidak termasuk hutang.
-  const cashFisik=fbTotal-opsTotal-co.total;
-  const cfEl=$('cashFisikTotal');
-  if(cfEl){cfEl.innerText=formatRupiah(cashFisik<0?0:cashFisik);cfEl.style.color=cashFisik<0?'var(--red)':'#2563eb';}
+  const rawBase=roundRp(fbTotal-opsTotal-co.total);
+  const baseAmount=Math.max(0,rawBase);
+  const latestAudit=getLatestCashDrawerAudit(today);
+  const adjustmentAmount=getCashDrawerAppliedAdjustmentForDate(today);
+  const cashFisik=Math.max(0,roundRp(baseAmount+adjustmentAmount));
+  return {today,manualIncome,fbTotal,opsTotal,co,rawBase,baseAmount,adjustmentAmount,cashFisik,latestAudit};
+}
+function getCashDrawerModalBasis(){
+  const edit=findCashDrawerAudit(cashDrawerEditingId);
+  if(edit){const baseAmount=roundRp(edit.baseAmount);const previousAdjustmentAmount=roundRp(edit.previousAdjustmentAmount);return {today:edit.dateKey,baseAmount,adjustmentAmount:previousAdjustmentAmount,cashFisik:Math.max(0,roundRp(baseAmount+previousAdjustmentAmount)),latestAudit:getLatestCashDrawerAudit(edit.dateKey),edit};}
+  return getTodayCashFisikData();
+}
+function cashDrawerAmountToInputValue(amount){const n=Number(amount||0)/1000;return Number.isInteger(n)?String(n):String(n.toFixed(3)).replace(/\.?0+$/,'')}
+function cashDrawerNotifyLabel(status,diff){const abs=Math.abs(roundRp(diff));if(status==='minus')return `Minus ${formatRupiah(abs)}`;if(status==='lebih')return `Lebih ${formatRupiah(abs)}`;return 'Pas'}
+function cashDrawerNotifyStatusText(status,context='line'){const s=String(status||'pending').toLowerCase();if(s==='sent')return context==='line'?'notif staff terkirim':'Terkirim';if(s==='failed')return context==='line'?'notif staff gagal':'Gagal';if(s==='saved_only'||s==='not_sent'||s==='skipped')return context==='line'?'tanpa kirim notif staff':'Tidak dikirim';return context==='line'?'notif staff pending':'Pending'}
+function renderCashDrawerHomeStatus(data=getTodayCashFisikData()){
+  const latest=data.latestAudit,statusEl=$('cashDrawerStatusLine'),adjEl=$('cashDrawerAdjustmentTotal'),noteEl=$('cashDrawerLatestNote');
+  if(adjEl){adjEl.innerText=formatSignedRupiah(data.adjustmentAmount);adjEl.style.color=data.adjustmentAmount<0?'var(--red)':(data.adjustmentAmount>0?'var(--green)':'var(--muted)')}
+  if(!latest){if(statusEl){statusEl.className='cash-drawer-status empty';statusEl.innerText='Belum dicek hari ini'}if(noteEl)noteEl.innerText='Input uang nyata di laci untuk tahu minus, pas, atau lebih.';return}
+  const cls=cashDrawerStatusClass(latest.status);
+  if(statusEl){statusEl.className='cash-drawer-status '+cls;statusEl.innerText=`Status Laci: ${cashDrawerNotifyLabel(latest.status,latest.differenceAmount)}`}
+  if(noteEl){let time='';try{time=new Date(latest.createdAt).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Jakarta'})}catch(e){}const notif=cashDrawerNotifyStatusText(latest.notifyStatus,'line');const note=latest.note?` - ${latest.note}`:'';noteEl.innerText=`${time||latest.dateKey} - Aplikasi ${formatRupiah(latest.expectedAmount)}, laci ${formatRupiah(latest.actualAmount)} - ${notif}${note}`}
+}
+function getCashDrawerActualInput(){const input=$('cashDrawerActualAmount');const raw=String(input&&input.value||'').trim();if(raw==='')return null;const actual=getActualAmount(raw);return Number.isFinite(actual)?roundRp(actual):null}
+function renderCashDrawerPreview(){
+  const data=getCashDrawerModalBasis(),expectedEl=$('cashDrawerExpectedAmount'),baseEl=$('cashDrawerBaseAmount'),adjEl=$('cashDrawerCurrentAdjustment');
+  if(expectedEl)expectedEl.innerText=formatRupiah(data.baseAmount);if(baseEl)baseEl.innerText=formatRupiah(data.cashFisik);if(adjEl)adjEl.innerText=formatSignedRupiah(data.adjustmentAmount);
+  const actual=getCashDrawerActualInput(),preview=$('cashDrawerStatusPreview');if(!preview)return;
+  if(actual===null){preview.className='cash-drawer-preview empty';preview.innerText='Isi uang nyata di laci.';return}
+  const diff=roundRp(actual-data.baseAmount),status=getCashDrawerStatus(diff);preview.className='cash-drawer-preview '+cashDrawerStatusClass(status);
+  const trx=status==='minus'?`Pengeluaran ${CASH_DRAWER_MINUS_CATEGORY_NAME}`:(status==='lebih'?`Pemasukan ${CASH_DRAWER_PLUS_CATEGORY_NAME}`:'tanpa transaksi selisih');
+  preview.innerText=`${cashDrawerStatusLabel(status)} - Selisih ${formatSignedRupiah(diff)} dari patokan. Cash aplikasi akan menjadi ${formatRupiah(actual)} (${trx}).`;
+}
+function openCashDrawerAuditModal(editId=null){
+  cashDrawerEditingId=editId?Number(editId):null;const edit=findCashDrawerAudit(cashDrawerEditingId);
+  const input=$('cashDrawerActualAmount');if(input)input.value=edit?cashDrawerAmountToInputValue(edit.actualAmount):'';
+  const prev=$('cashDrawerActualPreview');if(prev)prev.innerText=edit?formatRupiah(edit.actualAmount):'';
+  const note=$('cashDrawerNote');if(note)note.value=edit?String(edit.note||''):'';
+  const title=$('cashDrawerModalTitle');if(title)title.innerText=edit?'Edit Cek Laci Cash':'Cek Laci Cash';
+  const btn=$('cashDrawerSaveBtn');if(btn)btn.innerText=edit?'Update':'Simpan';
+  const notifyBtn=$('cashDrawerNotifyBtn');if(notifyBtn)notifyBtn.innerText=edit?'Update & Kirim Notif':'Kirim Notif';
+  renderCashDrawerPreview();const modal=$('cashDrawerAuditModal');if(modal)modal.classList.remove('hidden');setTimeout(()=>$('cashDrawerActualAmount')?.focus(),80);
+}
+function closeCashDrawerAuditModal(){cashDrawerEditingId=null;$('cashDrawerAuditModal')?.classList.add('hidden')}
+function handleCashDrawerActualPreview(input){const raw=String(input&&input.value||'').trim();const prev=$('cashDrawerActualPreview');if(prev)prev.innerText=raw===''?'':formatRupiah(getActualAmount(raw));renderCashDrawerPreview()}
+async function notifyCashDrawerStatus(audit){
+  if(!ROCKY_STAFF_NOTIFY_CASH_DRAWER_URL||!ROCKY_STAFF_NOTIFY_SECRET)return {ok:false,skipped:true,error:'Worker notifikasi belum disetting'};
+  const r=normalizeCashDrawerAudit(audit);
+  const body={secret:ROCKY_STAFF_NOTIFY_SECRET,auditId:String(r.id),dateKey:r.dateKey,status:r.status,amount:Math.abs(r.differenceAmount),expectedAmount:r.expectedAmount,actualAmount:r.actualAmount,differenceAmount:r.differenceAmount,adjustmentAmount:r.adjustmentAmount,note:r.note,source:'catatan_cash_drawer',createdByName:'Catatan'};
+  const res=await fetch(ROCKY_STAFF_NOTIFY_CASH_DRAWER_URL,{method:'POST',headers:{'Content-Type':'application/json','X-Notify-Secret':ROCKY_STAFF_NOTIFY_SECRET},body:JSON.stringify(body)});
+  const data=await res.json().catch(()=>({ok:false,status:res.status}));if(!res.ok||data.ok===false)throw new Error(data.error||data.message||`HTTP ${res.status}`);return data;
+}
+async function saveCashDrawerAudit(shouldNotify=false){
+  const actual=getCashDrawerActualInput();if(actual===null){showToast('Isi uang nyata di laci');return}if(actual<0){showToast('Nominal laci tidak valid');return}if(!supabaseClient){showToast('Supabase belum aktif');return}
+  if(!cashDrawerTableReady){try{await loadCashDrawerAudits()}catch(e){showToast('Tabel audit laci belum ada. Jalankan SQL cash_drawer_audits dulu.',5000);return}}
+  const edit=findCashDrawerAudit(cashDrawerEditingId),data=getCashDrawerModalBasis(),diff=roundRp(actual-data.baseAmount),status=getCashDrawerStatus(diff),note=String($('cashDrawerNote')?.value||'').trim();
+  const txInfo=status==='minus'?`Akan dibuat Pengeluaran kategori ${CASH_DRAWER_MINUS_CATEGORY_NAME}.`:(status==='lebih'?`Akan dibuat Pemasukan kategori ${CASH_DRAWER_PLUS_CATEGORY_NAME}.`:'PAS, tidak membuat transaksi selisih kas.');
+  const notifyInfo=shouldNotify?'Notifikasi akan dikirim ke aplikasi staff.':'Disimpan saja, notifikasi tidak dikirim ke staff.';
+  const ok=confirm(`${edit?'Update':'Simpan'} cek laci?\n\nPatokan aplikasi: ${formatRupiah(data.baseAmount)}\nCash tampil sekarang: ${formatRupiah(data.cashFisik)}\nUang di laci: ${formatRupiah(actual)}\nStatus: ${cashDrawerNotifyLabel(status,diff)}\n\n${txInfo}\nTransaksi selisih aktif tanggal ini akan mengikuti cek laci terakhir.\n${notifyInfo}`);
+  if(!ok)return;
+  const now=new Date().toISOString();
+  const row={id:edit?Number(edit.id):Date.now()+Math.floor(Math.random()*1000),owner_id:OWNER_ID,dateKey:data.today,baseAmount:data.baseAmount,expectedAmount:data.baseAmount,actualAmount:actual,differenceAmount:diff,previousAdjustmentAmount:data.adjustmentAmount,adjustmentAmount:diff,status,note,notifyStatus:shouldNotify?'pending':'saved_only',notifyResponse:shouldNotify?null:{savedOnly:true},createdAt:edit?edit.createdAt:now,updatedAt:now};
+  let saved=null;
+  try{saved=edit?await updateCashDrawerAuditRecord(edit.id,row):await insertCashDrawerAudit(row)}catch(e){showToast('Gagal simpan audit laci: '+(e.message||e),6000);return}
+  try{await syncCashDrawerAdjustmentTransactionForDate(saved.dateKey);await loadTransactions()}catch(e){showToast('Cek laci tersimpan, tapi transaksi Selisih Kas gagal dibuat: '+(e.message||e),7000);return}
+  if(shouldNotify){try{const notifyResult=await notifyCashDrawerStatus(saved);saved=await updateCashDrawerAuditNotify(saved,'sent',notifyResult);showToast(`Cek laci ${edit?'diupdate':'tersimpan'}: ${cashDrawerNotifyLabel(status,diff)}. Notifikasi staff terkirim.`)}catch(e){saved=await updateCashDrawerAuditNotify(saved,'failed',{error:String(e.message||e)});showToast(`Cek laci ${edit?'diupdate':'tersimpan'}, tapi notifikasi staff gagal: ${e.message||e}`,6000)}}
+  else showToast(`Cek laci ${edit?'diupdate':'tersimpan'}: ${cashDrawerNotifyLabel(status,diff)}. Notifikasi staff tidak dikirim.`);
+  cashDrawerEditingId=null;closeCashDrawerAuditModal();render();renderCashFisik();renderCashDrawerPreview();
+}
+let cashFisikDetailOpen=false;
+function setCashFisikDetail(open){
+  cashFisikDetailOpen=!!open;
+  const card=$('cashFisikCard'),btn=$('cashFisikToggleBtn'),detail=$('cashFisikDetail');
+  if(card){card.classList.toggle('cash-fisik-expanded',cashFisikDetailOpen);card.classList.toggle('cash-fisik-collapsed',!cashFisikDetailOpen)}
+  if(btn){btn.innerText=cashFisikDetailOpen?'Tutup':'Buka';btn.setAttribute('aria-expanded',cashFisikDetailOpen?'true':'false')}
+  if(detail)detail.setAttribute('aria-hidden',cashFisikDetailOpen?'false':'true');
+}
+function toggleCashFisikDetail(){setCashFisikDetail(!cashFisikDetailOpen)}
+function renderCashFisik(){
+  const data=getTodayCashFisikData();
+  const manualIncome=data.manualIncome,fbTotal=data.fbTotal,opsTotal=data.opsTotal,co=data.co,cashFisik=data.cashFisik;
+  const cfEl=$('cashFisikTotal');if(cfEl){cfEl.innerText=formatRupiah(cashFisik);cfEl.style.color=cashFisik<0?'var(--red)':'#2563eb'}
   const infoEl=$('todayFirebaseIncomeInfo');
   if(infoEl){
-    const parts=[];
-    if(fbTotal>0)parts.push(`Server Pusat ${formatRupiah(fbTotal)}`);
-    if(opsTotal>0)parts.push(`Ops -${formatRupiah(opsTotal)}`);
-    if(co.qris>0)parts.push(`QRIS -${formatRupiah(co.qris)}`);
-    if(co.tabungan>0)parts.push(`Tabungan -${formatRupiah(co.tabungan)}`);
-    if(manualIncome>0)parts.push(`Manual ${formatRupiah(manualIncome)} tidak masuk cash`);
-    infoEl.innerText=parts.length?parts.join(' · '):'Server Pusat - Ops Toko - QRIS - Tabungan · Hutang masuk Saldo Bersih';
+    const parts=[];if(fbTotal>0)parts.push(`Server Pusat ${formatRupiah(fbTotal)}`);if(opsTotal>0)parts.push(`Ops -${formatRupiah(opsTotal)}`);if(co.qris>0)parts.push(`QRIS -${formatRupiah(co.qris)}`);if(co.tabungan>0)parts.push(`Tabungan -${formatRupiah(co.tabungan)}`);if(data.adjustmentAmount!==0)parts.push(`Laci ${formatSignedRupiah(data.adjustmentAmount)}`);if(manualIncome>0)parts.push(`Manual ${formatRupiah(manualIncome)} tidak masuk cash`);
+    infoEl.innerText=parts.length?parts.join(' · '):'Server Pusat - Ops Toko - QRIS - Tabungan - Laci · Hutang masuk Saldo Bersih';
   }
   const opsTodayHomeEl=$('opsTodayHomeTotal');if(opsTodayHomeEl)opsTodayHomeEl.innerText=formatRupiah(opsTotal);
   const qEl=$('cashOutQrisTotal');if(qEl)qEl.innerText=formatRupiah(co.qris);
   const tEl=$('cashOutTabunganTotal');if(tEl)tEl.innerText=formatRupiah(co.tabungan);
-  const mf=$('cashOutModalFisikTotal');if(mf){mf.innerText=formatRupiah(cashFisik<0?0:cashFisik);mf.style.color=cashFisik<0?'var(--red)':'#1d4ed8';}
+  renderCashDrawerHomeStatus(data);
+  const mf=$('cashOutModalFisikTotal');if(mf){mf.innerText=formatRupiah(cashFisik);mf.style.color=cashFisik<0?'var(--red)':'#1d4ed8'}
   const mq=$('cashOutModalQris');if(mq)mq.innerText=formatRupiah(co.qris);
   const mt=$('cashOutModalTabungan');if(mt)mt.innerText=formatRupiah(co.tabungan);
+  renderCashDrawerPreview();
 }
 
 // =====================================================
@@ -5872,6 +6213,7 @@ async function refreshAllData(){
     if(supabaseClient){
       supabaseJobs.push(loadTransactions());
       supabaseJobs.push(loadZakatHistory());
+      supabaseJobs.push(loadCashDrawerAudits().catch(e=>{console.warn('Load audit laci gagal:',e);return [];}));
     }
     await Promise.allSettled(supabaseJobs);
     syncBelanjakuBridgeQueue().catch(e=>console.warn('Sync Belanjaku toko gagal:',e));
@@ -5946,6 +6288,7 @@ async function initApp(){try{if(!initSupabase())return;
   await ensureDefaultExpenseCategories();
   await migrateLegacyExpensesToDefaultCategory();
   await loadZakatHistory();
+  try{await loadCashDrawerAudits();}catch(e){console.warn('Load audit laci awal gagal:',e);}
   if(firebaseDb){
     // Tunggu snapshot pertama Supabase hari ini. Panel tanggal lain baru dibaca saat halaman Server dibuka.
     await Promise.race([
