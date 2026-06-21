@@ -2649,7 +2649,7 @@ async function resolveCashDrawerNotifyTargets(dateKey=getLocalDateString()){
     if(isKnownInactive(username))return false;
     const user=userByName.get(username)||{};
     const txSample=txRows.find(row=>serverRecordUsername(row)===username)||{};
-    return dailyUsers.has(username)||isServerDailyUser(user)||isServerDailyUser(txSample);
+    return dailyUsers.has(username)||isServerDailyUser(user)||isServerDailyUser(txSample)||isRismaSpecialClosingUser(username);
   });
   const usernames=uniqueServerUsernames([...staffAttendedUsernames,...dailyTransactionUsernames]);
   return {
@@ -2667,7 +2667,7 @@ async function resolveCashDrawerNotifyTargets(dateKey=getLocalDateString()){
 }
 function cashDrawerNotifySkipText(result={}){
   if(result.reason==='target_lookup_failed')return 'gagal cek penerima notif';
-  if(result.reason==='cash_drawer_no_target_usernames'||result.reason==='no_eligible_cash_drawer_targets')return 'tidak ada staf yang sudah absen atau harian yang transaksi hari ini';
+  if(result.reason==='cash_drawer_no_target_usernames'||result.reason==='no_eligible_cash_drawer_targets')return 'tidak ada staf yang sudah absen, harian, atau Risma yang transaksi hari ini';
   return result.message||'tidak ada penerima notif';
 }
 
@@ -3789,7 +3789,7 @@ async function notifyCashDrawerStatus(audit){
     return {ok:true,skipped:true,reason:'target_lookup_failed',message:'Gagal cek penerima notif cash fisik. Notifikasi tidak dikirim supaya tidak broadcast ke semua staff.',error:String(e?.message||e),sent:0,total:0,dateKey:r.dateKey};
   }
   if(!targetInfo.usernames.length){
-    return {ok:true,skipped:true,reason:'no_eligible_cash_drawer_targets',message:'Tidak ada staf yang sudah absen atau harian yang transaksi hari ini.',sent:0,total:0,...targetInfo};
+    return {ok:true,skipped:true,reason:'no_eligible_cash_drawer_targets',message:'Tidak ada staf yang sudah absen, harian, atau Risma yang transaksi hari ini.',sent:0,total:0,...targetInfo};
   }
   const body={secret:ROCKY_STAFF_NOTIFY_SECRET,auditId:String(r.id),dateKey:r.dateKey,status:r.status,amount:Math.abs(r.differenceAmount),expectedAmount:r.expectedAmount,actualAmount:r.actualAmount,differenceAmount:r.differenceAmount,adjustmentAmount:r.adjustmentAmount,note:r.note,source:'catatan_cash_drawer',createdByName:'Catatan',targetRule:targetInfo.rule,targetUsernames:targetInfo.usernames,targetCount:targetInfo.usernames.length,staffAttendedUsernames:targetInfo.staffAttendedUsernames,dailyTransactionUsernames:targetInfo.dailyTransactionUsernames};
   const res=await fetch(ROCKY_STAFF_NOTIFY_CASH_DRAWER_URL,{method:'POST',headers:{'Content-Type':'application/json','X-Notify-Secret':ROCKY_STAFF_NOTIFY_SECRET},body:JSON.stringify(body)});
