@@ -248,10 +248,6 @@
     .risma-product-receipt-row{font-weight:800;overflow-wrap:anywhere}
     .risma-product-receipt-sep{color:var(--muted);white-space:nowrap;overflow:hidden}
     .risma-product-desc{display:block;font-size:13px;font-weight:900;white-space:normal;overflow:visible;text-overflow:clip;line-height:1.28}
-    .risma-product-suggest{background:#fff;border:1px solid #f9a8d4;border-radius:12px;margin:5px 0;max-height:160px;overflow-y:auto;display:none;box-shadow:0 4px 12px rgba(190,24,93,0.1)}
-    .risma-product-suggest-item{padding:10px 12px;font-size:13px;font-weight:800;border-bottom:1px solid #fce7f3;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
-    .risma-product-suggest-item:last-child{border-bottom:none}
-    .risma-product-suggest-item:hover,.risma-product-suggest-item:active{background:#fdf2f8;color:#be185d}
     .risma-payment-summary{background:#fff0f6;border:1px solid #f9a8d4;border-radius:16px;padding:12px;margin:10px 0 12px}
     .risma-payment-summary .rp-label{font-size:10px;font-weight:950;color:#be185d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
     .risma-payment-summary .rp-amount{font-size:24px;font-weight:950;color:#be185d;line-height:1.12;margin:3px 0}
@@ -1184,7 +1180,7 @@
   <div id="expenseListModal" class="modal hidden"><div class="box" style="max-width:420px;width:100%"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px"><div><h3 style="margin:0;font-size:16px">Semua Pengeluaran</h3><small id="expenseListSubtitle" style="color:var(--muted);font-size:11px;font-weight:800"></small></div><button class="x" style="font-size:22px;padding:4px 6px" onclick="closeExpenseListModal()">×</button></div><div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#fff0ee;border-radius:13px;margin-bottom:12px"><span style="font-size:12px;font-weight:900;color:var(--red)">Total Pengeluaran</span><b id="expenseListTotal" class="num red" style="font-size:16px">Rp 0</b></div><div id="expenseListContent" class="list" style="max-height:55vh;overflow-y:auto"></div><button class="btn secondary" onclick="closeExpenseListModal()" style="margin-top:12px">Tutup</button></div></div>
 
   <main class="app">
-    <div class="top">
+    <div class="top" style="display: none;">
       <div class="brand">
         <div><h1 style="margin:0;font-size:17px">Risma</h1><small style="display:block;color:var(--muted);font-size:11px;margin-top:2px">Finance & Zakat</small></div>
         <button id="btnRefreshData" onclick="refreshAllData()" class="refresh-data-btn" title="Refresh data" aria-label="Refresh data">↻</button>
@@ -1241,7 +1237,6 @@
               <b id="cashDrawerAdjustmentTotal" class="breakdown-val num" style="color:var(--muted)" onclick="openCashDrawerAuditModal()">Rp 0</b>
             </div>
           </div>
-
         </div>
       </div>
       <!-- Hidden elements tetap ada agar JS tidak error -->
@@ -1285,26 +1280,6 @@
         <button class="shortcut-btn ops" onclick="openOpsModal()">Operasional Toko</button>
         <button class="shortcut-btn laci" onclick="openCashDrawerAuditModal()">Cek Cash</button>
         <button class="shortcut-btn qris" onclick="openCashOutModal()">+ QRIS</button>
-      </div>
-
-      <!-- Estimasi Uang Laci -->
-      <div id="estimasiLaciCard" style="display:none;margin-top:8px;background:#f8f9fa;border:1px solid #e9ecef;border-radius:14px;padding:12px 14px;">
-        <div style="font-size:12px;font-weight:800;color:#495057;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-          <i class="fas fa-money-bill-wave" style="color:#0ca678"></i> Estimasi Uang Laci
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:4px">
-          <span style="color:#6c757d">Sisa Uang Laci (Owner):</span>
-          <span id="estimasiLaciOwner" style="font-weight:600;font-family:monospace">Rp 0</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:4px">
-          <span style="color:#6c757d">Transaksi Cash Baru:</span>
-          <span id="estimasiLaciCash" style="font-weight:600;font-family:monospace">+ Rp 0</span>
-        </div>
-        <div style="border-top:1px dashed #dee2e6;margin:8px 0 6px"></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
-          <span style="font-weight:800;color:#343a40">Estimasi Laci:</span>
-          <span id="estimasiLaciTotal" style="font-weight:850;color:#0ca678;font-family:monospace">Rp 0</span>
-        </div>
       </div>
     </section>
 
@@ -1589,12 +1564,10 @@
         <div class="risma-tx-modal-card">
           <div class="field risma-product-builder">
             <input type="hidden" id="rismaDesc">
-            <form class="risma-product-entry" style="grid-template-columns: minmax(0,1fr) 50px auto !important; margin:0" onsubmit="event.preventDefault(); addRismaProductItem(); return false;">
-              <input type="text" id="rismaProductInput" placeholder="Nama barang..." oninput="updateRismaProductAddButton()" onkeydown="handleRismaProductKey(event)" style="border-color:#f9a8d4" autocomplete="off">
-              <input type="number" id="rismaProductQty" inputmode="numeric" min="1" value="1" placeholder="Qty" onfocus="hideRismaProductSuggest(); this.select()" onkeydown="handleRismaProductKey(event)" style="text-align:center;padding:0 !important;border-color:#f9a8d4">
-              <button type="submit" id="rismaProductAddBtn" class="btn" disabled style="background:#be185d;font-size:12px;padding:9px 10px;min-height:43px">+ Tambah</button>
-            </form>
-            <div id="rismaProductSuggest" class="risma-product-suggest"></div>
+            <div class="risma-product-entry">
+              <input type="text" id="rismaProductInput" placeholder="Nama barang..." oninput="updateRismaProductAddButton()" onkeydown="handleRismaProductKey(event)" style="border-color:#f9a8d4">
+              <button type="button" id="rismaProductAddBtn" class="btn" onclick="addRismaProductItem()" disabled style="background:#be185d;font-size:12px;padding:9px 10px;min-height:43px">+ Tambah Barang</button>
+            </div>
             <div class="small" style="margin:7px 0 5px;font-weight:900;color:#be185d">Daftar Barang:</div>
             <div id="rismaProductList" class="risma-product-list"></div>
           </div>
@@ -2010,8 +1983,6 @@ function createServerSupabaseFirestoreCompat(){
 
 function isSupabaseConfigured(){return SUPABASE_URL&&SUPABASE_ANON_KEY&&!SUPABASE_URL.includes('ISI_')&&!SUPABASE_ANON_KEY.includes('ISI_')}
 function initSupabase(){if(!isSupabaseConfigured()){showToast('Supabase belum disetting');return false}supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);return true}
-let rismaProducts=[];
-async function loadRismaProducts(){try{const{data,error}=await serverSupabaseClient.from('produk').select('*').order('nama_produk',{ascending:true});if(error)throw error;rismaProducts=data||[];}catch(e){console.warn('Gagal memuat daftar produk',e);}}
 const APP_PAGES=['home','staffDaily','risma'];
 const REMOVED_PAGES=['history','laporan','firebase'];
 function isHiddenModeBlockedPage(p){return false}
@@ -3867,44 +3838,7 @@ function renderCashFisik(){
   const mq=$('cashOutModalQris');if(mq)mq.innerText=formatRupiah(co.qris);
   const mt=$('cashOutModalTabungan');if(mt)mt.innerText=formatRupiah(co.tabungan);
   renderCashDrawerPreview();
-  renderEstimasiLaci();
 }
-
-function renderEstimasiLaci(){
-  const card=$('estimasiLaciCard');
-  if(!card)return;
-  try{
-    const today=todayKey();
-    // Ambil drawer_withdrawals yang sudah dimuat (dari Firebase via loadDrawerWithdrawals jika ada)
-    const withdrawals=(window._drawerWithdrawals||[]).filter(w=>{
-      if(w.deleted||w.status==='deleted')return false;
-      return String(w.dateKey||'').slice(0,10)===today;
-    });
-    if(!withdrawals.length){card.style.display='none';return;}
-    withdrawals.sort((a,b)=>(a.createdAtMs||0)-(b.createdAtMs||0));
-    const last=withdrawals[withdrawals.length-1];
-    const remainingOwner=Number(last.remainingAmount||0);
-    // Hitung transaksi cash setelah tarikan terakhir (exclude QRIS & transfer)
-    const txAll=(transactions||[]).filter(t=>{
-      if(t.type!=='income')return false;
-      const dk=String(t.date||t.dateKey||'').slice(0,10);
-      if(dk!==today)return false;
-      const pm=String(t.payment_method||t.paymentMethod||'').toLowerCase();
-      if(pm.includes('qris')||pm.includes('transfer'))return false;
-      return (t.created_at_ms||t.createdAtMs||0)>(last.createdAtMs||0);
-    });
-    const newCash=txAll.reduce((s,t)=>s+Number(t.amount||0),0);
-    const estimasi=remainingOwner+newCash;
-    const ownerEl=$('estimasiLaciOwner');
-    const cashEl=$('estimasiLaciCash');
-    const totalEl=$('estimasiLaciTotal');
-    if(ownerEl)ownerEl.innerText=formatRupiah(remainingOwner);
-    if(cashEl)cashEl.innerText='+ '+formatRupiah(newCash);
-    if(totalEl){totalEl.innerText=formatRupiah(estimasi);totalEl.style.color=estimasi<0?'var(--red)':'#0ca678';}
-    card.style.display='block';
-  }catch(e){card.style.display='none';console.warn('renderEstimasiLaci error',e);}
-}
-
 
 // =====================================================
 // RINGKASAN LABA BARU — filter harian/bulanan/tahunan/custom
@@ -4652,34 +4586,10 @@ function rismaProductTextFromItems(items,fallback='Transaksi'){
   const rows=(Array.isArray(items)?items:[]).map(rismaProductName).filter(Boolean);
   return rows.length?rows.join('\n'):fallback;
 }
-function hideRismaProductSuggest(){const list=$('rismaProductSuggest');if(list){list.style.display='none';list.innerHTML=''}}
-function pickRismaProductSuggest(name){
-  const input=$('rismaProductInput');
-  if(input){input.value=name;updateRismaProductAddButton();}
-  hideRismaProductSuggest();
-  $('rismaProductQty')?.focus?.();
-}
-function showRismaProductSuggest(query){
-  const q=String(query||'').trim().toLowerCase(),list=$('rismaProductSuggest');
-  if(!list)return;
-  if(!q){hideRismaProductSuggest();return}
-  if(!rismaProducts||!rismaProducts.length){hideRismaProductSuggest();return}
-  const matches=rismaProducts.filter(p=>p.nama_produk&&p.nama_produk.toLowerCase().includes(q)).slice(0,50);
-  if(!matches.length){hideRismaProductSuggest();return}
-  list.innerHTML=matches.map(p=>`<div class="risma-product-suggest-item" onclick="pickRismaProductSuggest('${escapeHtml(p.nama_produk)}')"><span>${escapeHtml(p.nama_produk)}</span></div>`).join('');
-  list.style.display='block';
-}
-
 function getRismaProductText(){
   const inputValue=rismaProductName($('rismaProductInput')?.value||'');
-  let qty=parseInt($('rismaProductQty')?.value||'1')||1;
   const rows=[...rismaProductItems];
-  if(inputValue){
-    const matched=rismaProducts.find(p=>p.nama_produk&&p.nama_produk.toUpperCase()===inputValue.toUpperCase());
-    if(matched){
-      rows.push(matched.nama_produk + (qty>1?` qty ${qty}`:''));
-    }
-  }
+  if(inputValue)rows.push(inputValue);
   return rismaProductTextFromItems(rows,'Transaksi');
 }
 function renderRismaProductItems(){
@@ -4692,41 +4602,20 @@ function renderRismaProductItems(){
     list.innerHTML='<div class="risma-product-empty">Ketik 1 barang boleh langsung Simpan. Tombol tambah hanya untuk barang berikutnya.</div>';
     return;
   }
-  list.innerHTML=rismaProductItems.map((item,i)=>{
-    let name=item, qtyStr='';
-    const qMatch=item.match(/ qty (\d+)$/i);
-    if(qMatch){ name=item.substring(0,qMatch.index).trim(); qtyStr=`<span style="background:#be185d;color:#fff;padding:2px 6px;border-radius:6px;font-size:10px;margin-left:6px;font-weight:900">x${qMatch[1]}</span>`; }
-    return `<div class="risma-product-row"><span class="risma-product-no">&gt;</span><span class="risma-product-name">${escapeHtml(name)}${qtyStr}</span><button type="button" class="risma-product-remove" onclick="removeRismaProductItem(${i})">Hapus</button></div>`;
-  }).join('');
+  list.innerHTML=rismaProductItems.map((item,i)=>`<div class="risma-product-row"><span class="risma-product-no">&gt;</span><span class="risma-product-name">${escapeHtml(item)}</span><button type="button" class="risma-product-remove" onclick="removeRismaProductItem(${i})">Hapus</button></div>`).join('');
 }
 function resetRismaProductItems(note=''){
   const text=String(note||'').trim();
   rismaProductItems=text&&text!=='Transaksi'?rismaProductItemsFromText(text,'Transaksi'):[];
-  $('rismaProductInput').value='';
-  if($('rismaProductQty')) $('rismaProductQty').value='1';
-  hideRismaProductSuggest();
   renderRismaProductItems();
 }
-function updateRismaProductAddButton(){
-  const input=$('rismaProductInput');
-  showRismaProductSuggest(input?.value);
-  renderRismaProductItems();
-}
+function updateRismaProductAddButton(){renderRismaProductItems()}
 function addRismaProductItem(){
-  const input=$('rismaProductInput'), qtyInput=$('rismaProductQty');
+  const input=$('rismaProductInput');
   const value=rismaProductName(input?.value||'');
-  let qty=parseInt(qtyInput?.value||'1')||1;
   if(!value){renderRismaProductItems();input?.focus?.();return}
-  const matched=rismaProducts.find(p=>p.nama_produk&&p.nama_produk.toUpperCase()===value.toUpperCase());
-  if(!matched){
-    showToast('Barang tidak ditemukan di database',true);
-    input?.focus?.();
-    return;
-  }
-  rismaProductItems.push(matched.nama_produk + (qty>1?` qty ${qty}`:''));
+  rismaProductItems.push(value);
   if(input)input.value='';
-  if(qtyInput)qtyInput.value='1';
-  hideRismaProductSuggest();
   renderRismaProductItems();
   setTimeout(()=>input?.focus?.(),0);
 }
@@ -6056,28 +5945,17 @@ function renderRismaToday(){
     return;
   }
   const sorted=[...rismaTodayRows].sort((a,b)=>getRismaRecordTime(b)-getRismaRecordTime(a));
-function getRismaTxTotalQty(note){
-  const items=rismaProductItemsFromText(note,'Transaksi');
-  let total=0;
-  items.forEach(item=>{
-    const qMatch=item.match(/ qty (\d+)$/i);
-    if(qMatch) total+=parseInt(qMatch[1])||1;
-    else total+=1;
-  });
-  return total;
-}
   list.innerHTML=sorted.map(t=>{
     const desc=t.description||t.desc||t.keterangan||t.note||'Transaksi';
     const ms=getRismaRecordTime(t);
     const waktu=ms?new Date(ms).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):'--:--';
     const payLabel=getRismaPaymentLabelFromRecord(t);
     const itemCount=rismaProductItemsFromText(desc,'Transaksi').length;
-    const totalQty = getRismaTxTotalQty(desc);
     const payBadge=payLabel?`<span style="display:inline-block;background:#fce7f3;color:#be185d;font-size:9px;font-weight:900;padding:2px 6px;border-radius:999px;border:1px solid #fbcfe8;white-space:nowrap">${escapeHtml(payLabel)}</span>`:'';
     return `<div style="background:white;border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
         <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">
-          <div style="background:#fce7f3;color:#be185d;width:32px;height:32px;flex:0 0 32px;border-radius:10px;font-size:15px;display:grid;place-items:center;font-weight:900">${totalQty>0?totalQty:'💰'}</div>
+          <div style="background:#fce7f3;color:#be185d;width:32px;height:32px;flex:0 0 32px;border-radius:10px;font-size:15px;display:grid;place-items:center">💰</div>
           <div style="min-width:0">
             <div style="font-size:13px;font-weight:800;color:#be185d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">+${formatRupiah(t.amount).replace('Rp\u00a0','Rp ')}</div>
             <div style="font-size:10px;color:var(--muted);font-weight:700;margin-top:1px">${escapeHtml(getRismaDisplayName())} · ${waktu}</div>
@@ -6344,10 +6222,6 @@ async function refreshCoreFirebaseDataOnce(){
     firebaseIncomeRows=normalizeFirebaseRows(snap.docs.map(d=>({...d.data(),_docId:d.id,id:d.id}))).filter(t=>t.dateKey===uploadDate);
     firebaseIncomeTotal=sumFirebaseRows(firebaseIncomeRows);
   }));
-  // Load Estimasi Uang Laci (drawer_withdrawals hari ini)
-  jobs.push(getFirebaseFreshSnapshot(firebaseDb.collection('drawer_withdrawals').where('dateKey','==',today)).then(snap=>{
-    window._drawerWithdrawals=snap.docs.map(d=>({...d.data(),id:d.id}));
-  }).catch(e=>{console.warn('Load drawer_withdrawals gagal:',e);}));
   await Promise.allSettled(jobs);
   const qrisChangedCore=await syncFirebaseQrisCashOut([...(todayFirebaseIncomeRows||[]),...(firebaseIncomeRows||[])],{quiet:true});
   if(qrisChangedCore)await loadTransactions();
@@ -6511,7 +6385,7 @@ async function initApp(){try{if(!initSupabase())return;
   initFirebase();
   // Tunggu Supabase + Supabase keduanya siap sebelum render pertama
   const FIREBASE_TIMEOUT=4000; // max tunggu 4 detik
-  await Promise.allSettled([loadRismaProducts(), loadTransactions()]);
+  await loadTransactions();
   await loadExpenseCategories();
   await ensureDefaultExpenseCategories();
   await migrateLegacyExpensesToDefaultCategory();
