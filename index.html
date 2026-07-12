@@ -88,13 +88,14 @@
     /* === REFRESH DATA GLOBAL === */
     .refresh-data-btn{
       display:inline-flex;align-items:center;justify-content:center;
-      background:#eef6ff;color:#2563eb;
-      border:1px solid #bfdbfe;border-radius:50%;
+      background:transparent;color:#6b7280;
+      border:none;border-radius:50%;
       width:36px;height:36px;
       cursor:pointer;flex-shrink:0;
-      font-size:18px;font-weight:950;line-height:1;
-      box-shadow:0 2px 8px rgba(37,99,235,.18);
+      font-size:15px;line-height:1;
+      transition:all .2s;
     }
+    .refresh-data-btn:hover{background:#f3f4f6;color:#374151;}
     .refresh-data-btn:active{opacity:.85;transform:scale(.93)}
     .refresh-data-btn:disabled{opacity:.58;cursor:not-allowed}
     .refresh-data-btn.refreshing{animation:refreshDataSpin .75s linear infinite}
@@ -1186,8 +1187,8 @@
   <main class="app">
     <div class="top">
       <div class="brand">
-        <div><h1 style="margin:0;font-size:17px">Risma</h1><small style="display:block;color:var(--muted);font-size:11px;margin-top:2px">Finance & Zakat</small></div>
-        <button id="btnRefreshData" onclick="refreshAllData()" class="refresh-data-btn" title="Refresh data" aria-label="Refresh data">↻</button>
+        <div><h1 style="margin:0;font-size:17px">Risma</h1><small style="display:block;color:var(--muted);font-size:11px;margin-top:2px"></small></div>
+        <button id="btnRefreshData" onclick="refreshAllData()" class="refresh-data-btn" title="Refresh data" aria-label="Refresh data"><i class="fas fa-sync-alt"></i></button>
 
         <div id="statusBadge" class="pill"><span id="statusText">Aman</span></div>
       </div>
