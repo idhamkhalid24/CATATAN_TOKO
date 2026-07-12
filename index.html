@@ -1288,7 +1288,7 @@
       </div>
 
       <!-- Estimasi Uang Laci -->
-      <div id="estimasiLaciCard" style="display:none;margin-top:8px;background:#f8f9fa;border:1px solid #e9ecef;border-radius:14px;padding:12px 14px;">
+      <div id="estimasiLaciCard" class="card" style="display:none;margin-bottom:8px;background:#f8f9fa;border:1px solid #e9ecef;box-shadow:none;padding:12px 14px;border-radius:12px;margin-top:0;">
         <div style="font-size:12px;font-weight:800;color:#495057;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
           <i class="fas fa-money-bill-wave" style="color:#0ca678"></i> Estimasi Uang Laci
         </div>
@@ -2957,6 +2957,14 @@ function startTodayFirebaseWatch(){
   if(!firebaseDb)return Promise.resolve();
   const today=getLocalDateString();
   if(todayFirebaseUnsub){todayFirebaseUnsub();todayFirebaseUnsub=null}
+  if(window.todayDrawerWithdrawalsUnsub){window.todayDrawerWithdrawalsUnsub();window.todayDrawerWithdrawalsUnsub=null}
+  
+  const qDw=firebaseDb.collection('drawer_withdrawals').where('dateKey','==',today);
+  window.todayDrawerWithdrawalsUnsub=qDw.onSnapshot(snap=>{
+    window._drawerWithdrawals=snap.docs.map(d=>({...d.data(),id:d.id}));
+    renderCashFisik();
+  });
+
   const q=firebaseDb.collection('transactions').where('dateKey','==',today);
   // Kembalikan Promise yang resolve setelah snapshot PERTAMA diterima
   return new Promise((resolve)=>{
@@ -3874,7 +3882,7 @@ function renderEstimasiLaci(){
   const card=$('estimasiLaciCard');
   if(!card)return;
   try{
-    const today=todayKey();
+    const today=getLocalDateString();
     // Ambil drawer_withdrawals yang sudah dimuat (dari Firebase via loadDrawerWithdrawals jika ada)
     const withdrawals=(window._drawerWithdrawals||[]).filter(w=>{
       if(w.deleted||w.status==='deleted')return false;
@@ -3885,7 +3893,7 @@ function renderEstimasiLaci(){
     const last=withdrawals[withdrawals.length-1];
     const remainingOwner=Number(last.remainingAmount||0);
     // Hitung transaksi cash setelah tarikan terakhir (exclude QRIS & transfer)
-    const txAll=(transactions||[]).filter(t=>{
+    const txAll=(window.todayFirebaseIncomeRows||[]).filter(t=>{
       if(t.type!=='income')return false;
       const dk=String(t.date||t.dateKey||'').slice(0,10);
       if(dk!==today)return false;
