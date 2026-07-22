@@ -3894,8 +3894,8 @@ function renderEstimasiLaci(){
     const last=withdrawals[withdrawals.length-1];
     const remainingOwner=Number(last.remainingAmount||0);
     // Hitung transaksi cash setelah tarikan terakhir (exclude QRIS & transfer)
-    const txAll=(window.todayFirebaseIncomeRows||[]).filter(t=>{
-      if(t.type!=='income')return false;
+    const txAll=(todayFirebaseIncomeRows||[]).filter(t=>{
+      if(t.type==='expense')return false;
       const dk=String(t.date||t.dateKey||'').slice(0,10);
       if(dk!==today)return false;
       const pm=String(t.payment_method||t.paymentMethod||'').toLowerCase();
